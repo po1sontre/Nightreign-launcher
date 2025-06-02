@@ -13,11 +13,8 @@ This is a simple launcher and game manager for the Nightreign mod, built with Py
 
 ## How to Use:
 
-1. Run the `Nightreign Launcher.exe` from the `dist` folder.
-2. If the game directory is not found, use the "Select Nightreign Game Folder" button to point to your Nightreign game installation.
-3. Choose your desired player count.
-4. Optionally, use the settings icon (⚙) to change the theme color or game folder.
-5. Click "Start Game" to launch Nightreign.
+- To use the Nightreign Launcher, you need to build the executable from the source code.
+- Please follow the instructions in the "Building from Source" section below to create the executable.
 
 ## Building from Source:
 
