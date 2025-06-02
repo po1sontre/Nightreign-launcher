@@ -117,7 +117,7 @@ class NightreignLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Nightreign Launcher")
-        self.setMinimumSize(600, 750)
+        self.setMinimumSize(600, 800)  # Increased height slightly for new button
         
         self.theme_color = "#00b4b4"
         self.theme_color_name = "Teal"
@@ -130,6 +130,14 @@ class NightreignLauncher(QMainWindow):
         self.steam_templates_dir = r"C:\Program Files (x86)\Steam\controller_base\templates"
         self.steam_config_dir = r"C:\Program Files (x86)\Steam\controller_config"
         self.vdf_file = resource_path("game_actions_480.vdf")
+        
+        # Path for update.exe - works for both dev and packaged versions
+        if hasattr(sys, '_MEIPASS'):
+            # When running as exe, look in the same directory as the exe
+            self.update_exe_path = os.path.join(os.path.dirname(sys.executable), "update.exe")
+        else:
+            # When running as script, look in the same directory as the script
+            self.update_exe_path = os.path.join(os.path.dirname(__file__), "update.exe")
         
         # Get user's save directory
         self.save_dir = get_user_save_directory()
@@ -174,6 +182,12 @@ class NightreignLauncher(QMainWindow):
         self.start_button.setMinimumSize(250, 55)
         self.start_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.start_button.clicked.connect(self.start_game)
+        
+        # Add update button
+        self.update_button = QPushButton("Update Game")
+        self.update_button.setMinimumSize(250, 55)
+        self.update_button.setFont(QFont("Arial", 13, QFont.Bold))
+        self.update_button.clicked.connect(self.update_game)
         
         self.patch_button = QPushButton("Patch Game")
         self.patch_button.setMinimumSize(250, 55)
@@ -225,6 +239,7 @@ class NightreignLauncher(QMainWindow):
         self.credits_label.setAlignment(Qt.AlignCenter)
         
         layout.addWidget(self.start_button)
+        layout.addWidget(self.update_button)
         layout.addWidget(self.patch_button)
         layout.addWidget(self.controller_button)
         layout.addWidget(self.backup_button)
@@ -238,6 +253,7 @@ class NightreignLauncher(QMainWindow):
         
         self.check_game_directory()
         self.check_save_directory()
+        self.check_update_exe()
 
     def check_game_directory(self):
         if not os.path.exists(self.game_dir):
@@ -261,6 +277,36 @@ class NightreignLauncher(QMainWindow):
             self.backup_button.setEnabled(False)
             if not self.save_dir:
                 print("Could not determine save directory for current user")
+
+    def check_update_exe(self):
+        """Check if update.exe exists and enable/disable update button accordingly"""
+        if os.path.exists(self.update_exe_path):
+            self.update_button.setEnabled(True)
+        else:
+            self.update_button.setEnabled(False)
+            print(f"Update executable not found at: {self.update_exe_path}")
+
+    def update_game(self):
+        """Run the update.exe file"""
+        if not os.path.exists(self.update_exe_path):
+            QMessageBox.critical(self, "Error", f"Update executable not found!\nExpected location: {self.update_exe_path}")
+            return
+        
+        try:
+            self.status_label.setText("Running game update...")
+            
+            # Run update.exe
+            subprocess.run([self.update_exe_path], check=True)
+            
+            self.status_label.setText("Game update completed!")
+            QMessageBox.information(self, "Success", "Game update has been completed successfully!")
+            
+        except subprocess.CalledProcessError as e:
+            QMessageBox.critical(self, "Error", f"Update process failed with exit code {e.returncode}")
+            self.status_label.setText("Update failed")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to run update: {str(e)}")
+            self.status_label.setText("Failed to run update")
 
     def select_game_folder(self):
         folder = QFileDialog.getExistingDirectory(

@@ -3,3 +3,4 @@ build/
 dist/
 *.spec
 venv/ 
+nightreign_launcher_2.0.zip
