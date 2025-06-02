@@ -1,0 +1,1248 @@
+"controller_mappings"
+{
+	"version"		"3"
+	"revision"		"17"
+	"title"		"#title"
+	"description"		""
+	"creator"		""
+	"progenitor"		""
+	"url"			""
+	"export_type"		"unknown"
+	"controller_type"		"controller_ps5"
+	"controller_caps"		"43473919"
+	"major_revision"		"0"
+	"minor_revision"		"0"
+	"Timestamp"		"1687143354"
+	"actions"
+	{
+		"fnr_controls"
+		{
+			"title"		"FNR Basic Controls"
+			"legacy_set"		"0"
+			"StickPadGyro"
+			{
+				"left_analog_controls"
+				{
+					"title"		"#LeftAnalogControls"
+					"input_mode"		"joystick_move"
+				}
+				"right_analog_controls"
+				{
+					"title"		"#RightAnalogControls"
+					"input_mode"		"joystick_move"
+				}
+			}
+			"AnalogTrigger"
+			{
+				"pad_l_trigger"		"#PadLeftTrigger"
+				"pad_r_trigger"		"#PadRightTrigger"
+			}
+			"Button"
+			{
+				"pad_l_up"		"#PadUp"
+				"pad_l_down"		"#PadDown"
+				"pad_l_left"		"#PadLeft"
+				"pad_l_right"		"#PadRight"
+				"pad_r_up"		"#PadY"
+				"pad_r_down"		"#PadA"
+				"pad_r_left"		"#PadX"
+				"pad_r_right"		"#PadB"
+				"pad_c_right"		"#PadStart"
+				"pad_c_left"		"#PadBack"
+				"pad_l_shoulder"		"#PadLeftShoulder"
+				"pad_r_shoulder"		"#PadRightShoulder"
+				"pad_l_thumb"		"#PadLeftThumb"
+				"pad_r_thumb"		"#PadRightThumb"
+			}
+		}
+	}
+	"action_layers"
+	{
+	}
+	"localization"
+	{
+		"japanese"
+		{
+			"title"				"ELDEN RING NIGHTREIGN の公式設定"
+			"LeftAnalogControls"		"左ジョイスティック"
+			"RightAnalogControls"		"右ジョイスティック"
+			"PadUp"				"十字キー 上"
+			"PadDown"			"十字キー 下"
+			"PadLeft"			"十字キー 左"
+			"PadRight"			"十字キー 右"
+			"PadY"				"△ ボタン"
+			"PadA"				"× ボタン"
+			"PadX"				"□ ボタン"
+			"PadB"				"○ ボタン"
+			"PadStart"			"オプション ボタン"
+			"PadBack"			"トラックパッド ボタン"
+			"PadLeftShoulder"		"L1 ボタン"
+			"PadRightShoulder"		"R1 ボタン"
+			"PadLeftTrigger"		"L2 ボタン"
+			"PadRightTrigger"		"R2 ボタン"
+			"PadLeftThumb"			"L3 ボタン"
+			"PadRightThumb"			"R3 ボタン"
+		}
+		"english"
+		{
+			"title"				"ELDEN RING NIGHTREIGN Official Settings"
+			"LeftAnalogControls"		"Left Joystick"
+			"RightAnalogControls"		"Right Joystick"
+			"PadUp"				"D-Pad Up"
+			"PadDown"			"D-Pad Down"
+			"PadLeft"			"D-Pad Left"
+			"PadRight"			"D-Pad Right"
+			"PadY"				"Triangle Button"
+			"PadA"				"Cross Button"
+			"PadX"				"Square Button"
+			"PadB"				"Circle Button"
+			"PadStart"			"Options Button"
+			"PadBack"			"Touch Pad Button"
+			"PadLeftShoulder"		"L1 Button"
+			"PadRightShoulder"		"R1 Button"
+			"PadLeftTrigger"		"L2 Button"
+			"PadRightTrigger"		"R2 Button"
+			"PadLeftThumb"			"L3 Button"
+			"PadRightThumb"			"R3 Button"
+		}
+		"french"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Stick analogique gauche"
+			"RightAnalogControls"		"Stick analogique droit"
+			"PadUp"				"BMD haut"
+			"PadDown"			"BMD bas"
+			"PadLeft"			"BMD gauche"
+			"PadRight"			"BMD droite"
+			"PadY"				"Touche triangle"
+			"PadA"				"Touche croix"
+			"PadX"				"Touche carré"
+			"PadB"				"Touche cercle"
+			"PadStart"			"Touche d'options"
+			"PadBack"			"Touche pavé tactile"
+			"PadLeftShoulder"		"Touche L1"
+			"PadRightShoulder"		"Touche R1"
+			"PadLeftTrigger"		"Touche L2"
+			"PadRightTrigger"		"Touche R2"
+			"PadLeftThumb"			"Touche L3"
+			"PadRightThumb"			"Touche R3"
+		}
+		"german"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Linker Joystick"
+			"RightAnalogControls"		"Rechter Joystick"
+			"PadUp"				"Steuerkreuz oben"
+			"PadDown"			"Steuerkreuz unten"
+			"PadLeft"			"Steuerkreuz links"
+			"PadRight"			"Steuerkreuz rechts"
+			"PadY"				"Dreieck-Taste"
+			"PadA"				"Kreuz-Taste"
+			"PadX"				"Quadrat-Taste"
+			"PadB"				"Kreis-Taste"
+			"PadStart"			"Optionstaste"
+			"PadBack"			"Touchpad-Taste"
+			"PadLeftShoulder"		"L1-Taste"
+			"PadRightShoulder"		"R1-Taste"
+			"PadLeftTrigger"		"L2-Taste"
+			"PadRightTrigger"		"R2-Taste"
+			"PadLeftThumb"			"L3-Taste"
+			"PadRightThumb"			"R3-Taste"
+		}
+		"italian"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Levetta sinistra"
+			"RightAnalogControls"		"Levetta destra"
+			"PadUp"				"Croce direzionale su"
+			"PadDown"			"Croce direzionale giù"
+			"PadLeft"			"Croce direzionale sinistra"
+			"PadRight"			"Croce direzionale destra"
+			"PadY"				"Tasto triangolo"
+			"PadA"				"Tasto croce"
+			"PadX"				"Tasto quadrato"
+			"PadB"				"Tasto cerchio"
+			"PadStart"			"Tasto opzioni"
+			"PadBack"			"Pulsante touch pad"
+			"PadLeftShoulder"		"Tasto L1"
+			"PadRightShoulder"		"Tasto R1"
+			"PadLeftTrigger"		"Tasto L2"
+			"PadRightTrigger"		"Tasto R2"
+			"PadLeftThumb"			"Tasto L3"
+			"PadRightThumb"			"Tasto R3"
+		}
+		"spanish"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Stick izquierdo"
+			"RightAnalogControls"		"Stick derecho"
+			"PadUp"				"Cruceta arriba"
+			"PadDown"			"Cruceta abajo"
+			"PadLeft"			"Cruceta izquierda"
+			"PadRight"			"Cruceta derecha"
+			"PadY"				"Botón triángulo"
+			"PadA"				"Botón equis"
+			"PadX"				"Botón cuadrado"
+			"PadB"				"Botón círculo"
+			"PadStart"			"Botón de opciones"
+			"PadBack"			"Panel táctil"
+			"PadLeftShoulder"		"Botón L1"
+			"PadRightShoulder"		"Botón R1"
+			"PadLeftTrigger"		"Botón L2"
+			"PadRightTrigger"		"Botón R2"
+			"PadLeftThumb"			"Botón L3"
+			"PadRightThumb"			"Botón R3"
+		}
+		"brazilian"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Analógico esquerdo"
+			"RightAnalogControls"		"Analógico direito"
+			"PadUp"				"Direcional para cima"
+			"PadDown"			"Direcional para baixo"
+			"PadLeft"			"Direcional esquerdo"
+			"PadRight"			"Direcional direito"
+			"PadY"				"Botão Triângulo"
+			"PadA"				"Botão Cruz"
+			"PadX"				"Botão Quadrado"
+			"PadB"				"Botão Círculo"
+			"PadStart"			"Botão Opções"
+			"PadBack"			"Botão Touchpad"
+			"PadLeftShoulder"		"Botão L1"
+			"PadRightShoulder"		"Botão R1"
+			"PadLeftTrigger"		"Botão L2"
+			"PadRightTrigger"		"Botão R2"
+			"PadLeftThumb"			"Botão L3"
+			"PadRightThumb"			"Botão R3"
+		}
+		"koreana"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"왼쪽 조이스틱"
+			"RightAnalogControls"		"오른쪽 조이스틱"
+			"PadUp"				"위쪽 십자키"
+			"PadDown"			"아래쪽 십자키"
+			"PadLeft"			"왼쪽 십자키"
+			"PadRight"			"오른쪽 십자키"
+			"PadY"				"△ 버튼"
+			"PadA"				"× 버튼"
+			"PadX"				"□ 버튼"
+			"PadB"				"○ 버튼"
+			"PadStart"			"옵션 버튼"
+			"PadBack"			"트랙 패드 버튼"
+			"PadLeftShoulder"		"L1 버튼"
+			"PadRightShoulder"		"R1 버튼"
+			"PadLeftTrigger"		"L2 버튼"
+			"PadRightTrigger"		"R2 버튼"
+			"PadLeftThumb"			"L3 버튼"
+			"PadRightThumb"			"R3 버튼"
+		}
+		"schinese"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"左摇杆"
+			"RightAnalogControls"		"右摇杆"
+			"PadUp"				"方向键 上"
+			"PadDown"			"方向键 下"
+			"PadLeft"			"方向键 左"
+			"PadRight"			"方向键 右"
+			"PadY"				"△键"
+			"PadA"				"×键"
+			"PadX"				"□键"
+			"PadB"				"○键"
+			"PadStart"			"选项键"
+			"PadBack"			"触控板按钮"
+			"PadLeftShoulder"		"L1键"
+			"PadRightShoulder"		"R1键"
+			"PadLeftTrigger"		"L2键"
+			"PadRightTrigger"		"R2键"
+			"PadLeftThumb"			"L3键"
+			"PadRightThumb"			"R3键"
+		}
+		"tchinese"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"左搖桿"
+			"RightAnalogControls"		"右搖桿"
+			"PadUp"				"方向鍵 上"
+			"PadDown"			"方向鍵 下"
+			"PadLeft"			"方向鍵 左"
+			"PadRight"			"方向鍵 右"
+			"PadY"				"△按鈕"
+			"PadA"				"×按鈕"
+			"PadX"				"□按鈕"
+			"PadB"				"○按鈕"
+			"PadStart"			"選項按鈕"
+			"PadBack"			"觸控板按鈕"
+			"PadLeftShoulder"		"L1按鈕"
+			"PadRightShoulder"		"R1按鈕"
+			"PadLeftTrigger"		"L2按鈕"
+			"PadRightTrigger"		"R2按鈕"
+			"PadLeftThumb"			"L3按鈕"
+			"PadRightThumb"			"R3按鈕"
+		}
+		"polish"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Lewy drążek"
+			"RightAnalogControls"		"Prawy drążek"
+			"PadUp"				"Pad kierunkowy – góra"
+			"PadDown"			"Pad kierunkowy – dół"
+			"PadLeft"			"Pad kierunkowy – lewo"
+			"PadRight"			"Pad kierunkowy – prawo"
+			"PadY"				"Przycisk trójkąt"
+			"PadA"				"Przycisk krzyżyk"
+			"PadX"				"Przycisk kwadrat"
+			"PadB"				"Przycisk kółko"
+			"PadStart"			"Przycisk opcji"
+			"PadBack"			"Przycisk panelu dotykowego"
+			"PadLeftShoulder"		"Przycisk L1"
+			"PadRightShoulder"		"Przycisk R1"
+			"PadLeftTrigger"		"Przycisk L2"
+			"PadRightTrigger"		"Przycisk R2"
+			"PadLeftThumb"			"Przycisk L3"
+			"PadRightThumb"			"Przycisk R3"
+		}
+		"russian"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Левый мини-джойстик"
+			"RightAnalogControls"		"Правый мини-джойстик"
+			"PadUp"				"Вверх на крестовине"
+			"PadDown"			"Вниз на крестовине"
+			"PadLeft"			"Влево на крестовине"
+			"PadRight"			"Вправо на крестовине"
+			"PadY"				"Кнопка «треугольник»"
+			"PadA"				"Кнопка «крест»"
+			"PadX"				"Кнопка «квадрат»"
+			"PadB"				"Кнопка «круг»"
+			"PadStart"			"Кнопка параметров"
+			"PadBack"			"Кнопка сенсорной панели"
+			"PadLeftShoulder"		"Кнопка L1"
+			"PadRightShoulder"		"Кнопка R1"
+			"PadLeftTrigger"		"Кнопка L2"
+			"PadRightTrigger"		"Кнопка R2"
+			"PadLeftThumb"			"Кнопка L3"
+			"PadRightThumb"			"Кнопка R3"
+		}
+		"latam"
+		{
+			"title"				" "
+			"LeftAnalogControls"		"Joystick izquierdo"
+			"RightAnalogControls"		"Joystick derecho"
+			"PadUp"				"Botón direccional arriba"
+			"PadDown"			"Botón direccional abajo"
+			"PadLeft"			"Botón direccional izquierda"
+			"PadRight"			"Botón direccional derecha"
+			"PadY"				"Botón triángulo"
+			"PadA"				"Botón equis"
+			"PadX"				"Botón cuadrado"
+			"PadB"				"Botón círculo"
+			"PadStart"			"Botón opciones"
+			"PadBack"			"Botón del panel táctil"
+			"PadLeftShoulder"		"Botón L1"
+			"PadRightShoulder"		"Botón R1"
+			"PadLeftTrigger"		"Botón L2"
+			"PadRightTrigger"		"Botón R2"
+			"PadLeftThumb"			"Botón L3"
+			"PadRightThumb"			"Botón R3"
+		}
+	}
+	"group"
+	{
+		"id"		"0"
+		"mode"		"four_buttons"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"button_a"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button A, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_b"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button B, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_x"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button X, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_y"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button Y, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"1"
+		"mode"		"dpad"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+	}
+	"group"
+	{
+		"id"		"2"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button JOYSTICK_RIGHT, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"2"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"3"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button JOYSTICK_LEFT, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"2"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"4"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button TRIGGER_LEFT, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"2"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"settings"
+		{
+			"output_trigger"		"1"
+		}
+	}
+	"group"
+	{
+		"id"		"5"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button TRIGGER_RIGHT, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"2"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"settings"
+		{
+			"output_trigger"		"2"
+		}
+	}
+	"group"
+	{
+		"id"		"6"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button JOYSTICK_RIGHT, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"2"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"8"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button JOYSTICK_RIGHT, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"9"
+		"mode"		"dpad"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+		"settings"
+		{
+			"requires_click"		"0"
+			"haptic_intensity_override"		"0"
+		}
+	}
+	"group"
+	{
+		"id"		"10"
+		"mode"		"single_button"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button START, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"11"
+		"mode"		"single_button"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button SELECT, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"13"
+		"mode"		"four_buttons"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"button_a"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_down, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_b"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_right, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_x"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_left, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_y"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_up, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"14"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+	}
+	"group"
+	{
+		"id"		"15"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+	}
+	"group"
+	{
+		"id"		"18"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+		"settings"
+		{
+			"virtual_mode"		"1"
+		}
+		"gameactions"
+		{
+			"fnr_controls"		"pad_l_trigger"
+		}
+	}
+	"group"
+	{
+		"id"		"19"
+		"mode"		"trigger"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+		}
+		"settings"
+		{
+			"virtual_mode"		"1"
+		}
+		"gameactions"
+		{
+			"fnr_controls"		"pad_r_trigger"
+		}
+	}
+	"group"
+	{
+		"id"		"20"
+		"mode"		"dpad"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"dpad_north"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_up, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"dpad_south"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_down, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"dpad_east"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_right, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"dpad_west"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_left, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"settings"
+		{
+			"requires_click"		"0"
+			"haptic_intensity_override"		"0"
+		}
+	}
+	"group"
+	{
+		"id"		"21"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_thumb, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"settings"
+		{
+			"virtual_mode"		"1"
+		}
+		"gameactions"
+		{
+			"fnr_controls"		"left_analog_controls"
+		}
+	}
+	"group"
+	{
+		"id"		"22"
+		"mode"		"joystick_move"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_thumb, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"settings"
+		{
+			"virtual_mode"		"1"
+		}
+		"gameactions"
+		{
+			"fnr_controls"		"right_analog_controls"
+		}
+	}
+	"group"
+	{
+		"id"		"27"
+		"mode"		"single_button"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_c_left, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"0"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"7"
+		"mode"		"switches"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"button_escape"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button start, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_menu"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button select, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"left_bumper"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button shoulder_left, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"right_bumper"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button shoulder_right, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_back_left"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button a, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"button_back_right"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"xinput_button x, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"12"
+		"mode"		"switches"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"button_escape"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_c_right, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"left_bumper"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_l_shoulder, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+			"right_bumper"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_r_shoulder, , "
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+	}
+	"group"
+	{
+		"id"		"31"
+		"mode"		"single_button"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_c_left, #PadBack, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"0"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"gameactions"
+		{
+		}
+	}
+	"group"
+	{
+		"id"		"32"
+		"mode"		"single_button"
+		"name"		""
+		"description"		""
+		"inputs"
+		{
+			"click"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding"		"game_action fnr_controls pad_c_left, #PadBack, , "
+						}
+						"settings"
+						{
+							"haptic_intensity"		"0"
+						}
+					}
+				}
+				"disabled_activators"
+				{
+				}
+			}
+		}
+		"gameactions"
+		{
+		}
+	}
+	"preset"
+	{
+		"id"		"0"
+		"name"		"fnr_controls"
+		"group_source_bindings"
+		{
+			"12"		"switch active"
+			"13"		"button_diamond active"
+			"21"		"joystick active"
+			"14"		"left_trigger inactive"
+			"18"		"left_trigger active"
+			"15"		"right_trigger inactive"
+			"19"		"right_trigger active"
+			"22"		"right_joystick active"
+			"20"		"dpad active"
+			"27"		"center_trackpad active"
+			"32"		"left_trackpad active"
+			"31"		"right_trackpad active"
+		}
+	}
+	"settings"
+	{
+		"left_trackpad_mode"		"0"
+		"right_trackpad_mode"		"0"
+	}
+}

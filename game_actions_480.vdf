@@ -1,0 +1,91 @@
+﻿"Action Manifest"
+{
+	"configurations"
+	{
+		"controller_xboxone"
+		{
+			"0"
+			{
+				"path" "steam_input_for_xboxone_controller.vdf"
+			}
+		}
+		"controller_ps4"
+		{
+			"0"
+			{
+				"path" "steam_input_for_ps4_controller.vdf"
+			}
+		}
+		"controller_ps5"
+		{
+			"0"
+			{
+				"path" "steam_input_for_ps5_controller.vdf"
+			}
+		}
+		"controller_switch_pro"
+		{
+			"0"
+			{
+				"path" "steam_input_for_switch_pro_controller.vdf"
+			}
+		}		
+		"controller_neptune"
+		{
+			"0"
+			{
+				"path" "steam_input_for_steam_deck.vdf"
+			}
+		}
+		"controller_steamcontroller_gordon"
+		{
+			"0"
+			{
+				"path" "steam_input_for_steam_controller.vdf"
+			}
+		}
+	}
+	"actions"
+	{
+		"fnr_controls"
+		{
+			"title"		"#BasicControls"
+			"legacy_set"		"0"
+			"StickPadGyro"
+			{
+				"left_analog_controls"
+				{
+					"title"		"#LeftAnalogControls"
+					"input_mode"		"joystick_move"
+				}
+				"right_analog_controls"
+				{
+					"title"		"#RightAnalogControls"
+					"input_mode"		"joystick_move"
+				}
+			}
+			"AnalogTrigger"
+			{
+				"pad_l_trigger"		"#PadLeftTrigger"
+				"pad_r_trigger"		"#PadRightTrigger"
+			}
+			"Button"
+			{
+				"pad_l_up"			"#PadUp"
+				"pad_l_down"			"#PadDown"
+				"pad_l_left"			"#PadLeft"
+				"pad_l_right"			"#PadRight"
+				"pad_r_up"				"#PadY"
+				"pad_r_down"				"#PadA"
+				"pad_r_left"				"#PadX"
+				"pad_r_right"				"#PadB"
+				"pad_c_right"			"#PadStart"
+				"pad_c_left"			"#PadBack"
+				"pad_l_shoulder"	"#PadLeftShoulder"
+				"pad_r_shoulder"	"#PadRightShoulder"
+				"pad_l_thumb"		"#PadLeftThumb"
+				"pad_r_thumb"		"#PadRightThumb"
+			}
+		}
+	}
+}
