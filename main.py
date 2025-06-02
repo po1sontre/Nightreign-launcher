@@ -5,6 +5,8 @@ import ctypes
 import configparser
 import shutil
 import webbrowser
+import zipfile
+from datetime import datetime
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QPushButton, QSpinBox, QLabel, QFrame, QMessageBox,
                              QFileDialog, QHBoxLayout, QDialog, QComboBox,
@@ -17,6 +19,15 @@ def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
+
+def get_user_save_directory():
+    """ Get the current user's Nightreign save directory """
+    username = os.getenv('USERNAME')
+    if username:
+        save_dir = os.path.join(f"C:\\Users\\{username}\\AppData\\Roaming\\Nightreign")
+        if os.path.exists(save_dir):
+            return save_dir
+    return None
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -106,7 +117,7 @@ class NightreignLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Nightreign Launcher")
-        self.setMinimumSize(500, 600)
+        self.setMinimumSize(600, 750)
         
         self.theme_color = "#00b4b4"
         self.theme_color_name = "Teal"
@@ -120,11 +131,14 @@ class NightreignLauncher(QMainWindow):
         self.steam_config_dir = r"C:\Program Files (x86)\Steam\controller_config"
         self.vdf_file = resource_path("game_actions_480.vdf")
         
+        # Get user's save directory
+        self.save_dir = get_user_save_directory()
+        
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
         layout.setAlignment(Qt.AlignCenter)
-        layout.setSpacing(20)
+        layout.setSpacing(15)
         
         top_bar = QWidget()
         top_layout = QHBoxLayout(top_bar)
@@ -157,23 +171,29 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(self.subtitle_label)
         
         self.start_button = QPushButton("Start Game")
-        self.start_button.setMinimumSize(200, 50)
-        self.start_button.setFont(QFont("Arial", 12, QFont.Bold))
+        self.start_button.setMinimumSize(250, 55)
+        self.start_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.start_button.clicked.connect(self.start_game)
         
         self.patch_button = QPushButton("Patch Game")
-        self.patch_button.setMinimumSize(200, 50)
-        self.patch_button.setFont(QFont("Arial", 12, QFont.Bold))
+        self.patch_button.setMinimumSize(250, 55)
+        self.patch_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.patch_button.clicked.connect(self.patch_game)
         
         self.controller_button = QPushButton("Controller Fix")
-        self.controller_button.setMinimumSize(200, 50)
-        self.controller_button.setFont(QFont("Arial", 12, QFont.Bold))
+        self.controller_button.setMinimumSize(250, 55)
+        self.controller_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.controller_button.clicked.connect(self.fix_controller)
         
+        # Add backup button
+        self.backup_button = QPushButton("Backup Save Files")
+        self.backup_button.setMinimumSize(250, 55)
+        self.backup_button.setFont(QFont("Arial", 13, QFont.Bold))
+        self.backup_button.clicked.connect(self.backup_saves)
+        
         self.select_folder_button = QPushButton("Select Nightreign Game Folder")
-        self.select_folder_button.setMinimumSize(200, 50)
-        self.select_folder_button.setFont(QFont("Arial", 12, QFont.Bold))
+        self.select_folder_button.setMinimumSize(250, 55)
+        self.select_folder_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.select_folder_button.clicked.connect(self.select_game_folder)
         
         player_container = QWidget()
@@ -207,6 +227,7 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(self.start_button)
         layout.addWidget(self.patch_button)
         layout.addWidget(self.controller_button)
+        layout.addWidget(self.backup_button)
         layout.addWidget(self.select_folder_button)
         layout.addWidget(player_container)
         layout.addStretch()
@@ -216,6 +237,7 @@ class NightreignLauncher(QMainWindow):
         self.update_theme_color(self.theme_color_name)
         
         self.check_game_directory()
+        self.check_save_directory()
 
     def check_game_directory(self):
         if not os.path.exists(self.game_dir):
@@ -231,6 +253,15 @@ class NightreignLauncher(QMainWindow):
             self.controller_button.setEnabled(True)
             self.status_label.setText("Ready to launch")
 
+    def check_save_directory(self):
+        """Check if save directory exists and enable/disable backup button accordingly"""
+        if self.save_dir and os.path.exists(self.save_dir):
+            self.backup_button.setEnabled(True)
+        else:
+            self.backup_button.setEnabled(False)
+            if not self.save_dir:
+                print("Could not determine save directory for current user")
+
     def select_game_folder(self):
         folder = QFileDialog.getExistingDirectory(
             self,
@@ -244,6 +275,52 @@ class NightreignLauncher(QMainWindow):
             self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
             self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
             self.check_game_directory()
+
+    def backup_saves(self):
+        """Create a backup of the save files"""
+        if not self.save_dir or not os.path.exists(self.save_dir):
+            QMessageBox.critical(self, "Error", "Save directory not found!\nExpected location: C:\\Users\\[username]\\AppData\\Roaming\\Nightreign")
+            return
+        
+        # Check if there are any files to backup
+        if not os.listdir(self.save_dir):
+            QMessageBox.information(self, "Info", "Save directory is empty. Nothing to backup.")
+            return
+        
+        # Generate default backup filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_filename = f"Nightreign_Backup_{timestamp}.zip"
+        
+        # Ask user where to save the backup
+        backup_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save Backup As",
+            default_filename,
+            "Zip Files (*.zip);;All Files (*)"
+        )
+        
+        if not backup_path:
+            return  # User cancelled
+        
+        try:
+            self.status_label.setText("Creating backup...")
+            
+            # Create zip file
+            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                # Walk through the save directory and add all files
+                for root, dirs, files in os.walk(self.save_dir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        # Create relative path for zip archive
+                        arc_path = os.path.relpath(file_path, self.save_dir)
+                        zipf.write(file_path, arc_path)
+            
+            self.status_label.setText("Backup created successfully!")
+            QMessageBox.information(self, "Success", f"Save files backed up successfully to:\n{backup_path}")
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to create backup: {str(e)}")
+            self.status_label.setText("Failed to create backup")
 
     def update_player_count(self, count):
         try:
