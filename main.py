@@ -29,6 +29,25 @@ def get_user_save_directory():
             return save_dir
     return None
 
+def validate_game_directory(potential_dir):
+    """ Validates if the given directory is the correct game folder or finds it within """
+    if not potential_dir or not os.path.exists(potential_dir):
+        return None
+
+    # Check if the expected game executable exists directly in the potential_dir
+    if os.path.exists(os.path.join(potential_dir, "nrsc_launcher.exe")):
+        return potential_dir
+
+    # If not found directly, check common subdirectories like 'Game'
+    common_subdirs = ["Game"]
+    for subdir_name in common_subdirs:
+        subdir_path = os.path.join(potential_dir, subdir_name)
+        if os.path.exists(os.path.join(subdir_path, "nrsc_launcher.exe")):
+            return subdir_path
+
+    # If still not found, return None
+    return None
+
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -107,8 +126,13 @@ class SettingsDialog(QDialog):
             self.folder_label.text(),
             QFileDialog.ShowDirsOnly
         )
+        
         if folder:
-            self.folder_label.setText(folder)
+            validated_folder = validate_game_directory(folder)
+            if validated_folder:
+                self.folder_label.setText(validated_folder)
+            else:
+                QMessageBox.warning(self, "Invalid Folder", "The selected folder does not appear to be the correct Nightreign game directory or its parent. Please select the folder containing 'nrsc_launcher.exe'.")
     
     def update_selected_color_name(self, color_name):
         self.selected_color_name = color_name
@@ -317,10 +341,15 @@ class NightreignLauncher(QMainWindow):
         )
         
         if folder:
-            self.game_dir = folder
-            self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
-            self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
-            self.check_game_directory()
+            # Validate the selected folder
+            validated_folder = validate_game_directory(folder)
+            if validated_folder:
+                self.game_dir = validated_folder
+                self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
+                self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
+                self.check_game_directory()
+            else:
+                QMessageBox.warning(self, "Invalid Folder", "The selected folder does not appear to be the correct Nightreign game directory or its parent. Please select the folder containing 'nrsc_launcher.exe'.")
 
     def backup_saves(self):
         """Create a backup of the save files"""
@@ -485,16 +514,28 @@ class NightreignLauncher(QMainWindow):
     def show_settings(self):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.Accepted:
-            new_game_dir = dialog.folder_label.text()
-            if new_game_dir != self.game_dir:
-                self.game_dir = new_game_dir
-                self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
-                self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
-                self.check_game_directory()
-            
-            selected_color_name = dialog.selected_color_name
-            if selected_color_name != self.theme_color_name:
-                self.update_theme_color(selected_color_name)
+            # Get the selected folder text from the dialog's label
+            selected_folder_text = dialog.folder_label.text()
+            # Validate this path before updating game_dir
+            validated_folder = validate_game_directory(selected_folder_text)
+
+            if validated_folder:
+                # Only update if the validated folder is different from the current game_dir
+                if validated_folder != self.game_dir:
+                    self.game_dir = validated_folder
+                    self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
+                    self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
+                    self.check_game_directory()
+
+                # Get the selected color name from the dialog and update theme
+                selected_color_name = dialog.selected_color_name
+                if selected_color_name != self.theme_color_name:
+                    self.update_theme_color(selected_color_name)
+            else:
+                 # This case should ideally not happen if validation is done in the dialog,
+                 # but as a fallback, if the folder text from the dialog is somehow invalid,
+                 # we could show a warning here too.
+                 pass # Or add a warning if deemed necessary
     
     def update_theme_color(self, color_name):
         color_map = {
