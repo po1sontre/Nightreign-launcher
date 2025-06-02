@@ -24,10 +24,8 @@ class SettingsDialog(QDialog):
         self.setWindowTitle("Settings")
         self.setMinimumWidth(400)
         
-        # Create layout
         layout = QFormLayout(self)
         
-        # Game folder selection
         folder_layout = QHBoxLayout()
         self.folder_label = QLabel(parent.game_dir)
         self.folder_label.setStyleSheet(f"color: {parent.theme_color};")
@@ -36,34 +34,28 @@ class SettingsDialog(QDialog):
         folder_layout.addWidget(self.folder_label)
         folder_layout.addWidget(folder_button)
         
-        # Color selection
         color_layout = QHBoxLayout()
         self.color_combo = QComboBox()
         self.color_combo.addItems(["Teal", "Purple", "Orange", "Pink", "Red", "Green", "Blue"])
-        # Initialize with parent's current color name
         self.color_combo.setCurrentText(parent.theme_color_name)
-        # Store selected color name immediately, but don't apply until accept
-        self.selected_color_name = parent.theme_color_name # Initialize selected color
+        self.selected_color_name = parent.theme_color_name
         self.color_combo.currentTextChanged.connect(self.update_selected_color_name)
         color_layout.addWidget(self.color_combo)
         
-        # Add to form
         layout.addRow("Game Folder:", folder_layout)
         layout.addRow("Theme Color:", color_layout)
         
-        # Apply button
         apply_button = QPushButton("Apply")
-        apply_button.clicked.connect(self.accept) # Accept closes with Accepted result
+        apply_button.clicked.connect(self.accept)
         layout.addRow("", apply_button)
         
-        # Style - use current parent theme color
         self.setStyleSheet(f"""
             QDialog {{
                 background-color: #000000;
                 color: #ffffff;
             }}
             QLabel {{
-                color: #ffffff; /* Keep labels white in settings dialog */
+                color: #ffffff;
             }}
             QPushButton {{
                 background-color: #1a1a1a;
@@ -116,11 +108,9 @@ class NightreignLauncher(QMainWindow):
         self.setWindowTitle("Nightreign Launcher")
         self.setMinimumSize(500, 600)
         
-        # Theme color - Store both hex and name
         self.theme_color = "#00b4b4"
         self.theme_color_name = "Teal"
         
-        # Game paths
         self.game_dir = r"C:\Games\ELDEN RING NIGHTREIGN\Game"
         self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
         self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
@@ -130,25 +120,21 @@ class NightreignLauncher(QMainWindow):
         self.steam_config_dir = r"C:\Program Files (x86)\Steam\controller_config"
         self.vdf_file = resource_path("game_actions_480.vdf")
         
-        # Create central widget and main layout
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
         layout.setAlignment(Qt.AlignCenter)
         layout.setSpacing(20)
         
-        # Create top bar with settings and Discord
         top_bar = QWidget()
         top_layout = QHBoxLayout(top_bar)
         top_layout.setContentsMargins(10, 10, 10, 10)
         
-        # Settings button
         self.settings_button = QPushButton("⚙")
         self.settings_button.setFixedSize(35, 35)
         self.settings_button.setFont(QFont("Segoe UI Symbol", 20))
         self.settings_button.clicked.connect(self.show_settings)
         
-        # Discord button
         self.discord_button = QPushButton("Join Discord")
         self.discord_button.setFixedSize(120, 35)
         self.discord_button.setFont(QFont("Arial", 11, QFont.Bold))
@@ -158,79 +144,66 @@ class NightreignLauncher(QMainWindow):
         top_layout.addWidget(self.discord_button)
         top_layout.addStretch()
         
-        # Create title label - store as instance variable for easy access
         self.title_label = QLabel("NIGHTREIGN")
         self.title_label.setFont(QFont("Arial", 24, QFont.Bold))
         self.title_label.setAlignment(Qt.AlignCenter)
         
-        # Create subtitle - store as instance variable for easy access
         self.subtitle_label = QLabel("Game Manager")
         self.subtitle_label.setFont(QFont("Arial", 14))
         self.subtitle_label.setAlignment(Qt.AlignCenter)
         
-        # Add widgets to layout
         layout.addWidget(top_bar)
         layout.addWidget(self.title_label)
         layout.addWidget(self.subtitle_label)
         
-        # Create and style the Start Game button
         self.start_button = QPushButton("Start Game")
         self.start_button.setMinimumSize(200, 50)
         self.start_button.setFont(QFont("Arial", 12, QFont.Bold))
         self.start_button.clicked.connect(self.start_game)
         
-        # Create Patch Game button
         self.patch_button = QPushButton("Patch Game")
         self.patch_button.setMinimumSize(200, 50)
         self.patch_button.setFont(QFont("Arial", 12, QFont.Bold))
         self.patch_button.clicked.connect(self.patch_game)
         
-        # Create Controller Fix button
         self.controller_button = QPushButton("Controller Fix")
         self.controller_button.setMinimumSize(200, 50)
         self.controller_button.setFont(QFont("Arial", 12, QFont.Bold))
         self.controller_button.clicked.connect(self.fix_controller)
         
-        # Create Select Game Folder button (initially hidden)
         self.select_folder_button = QPushButton("Select Nightreign Game Folder")
         self.select_folder_button.setMinimumSize(200, 50)
         self.select_folder_button.setFont(QFont("Arial", 12, QFont.Bold))
         self.select_folder_button.clicked.connect(self.select_game_folder)
         
-        # Create player count container
         player_container = QWidget()
         player_layout = QHBoxLayout(player_container)
         player_layout.setSpacing(10)
         
-        # Create player count buttons
         self.player_buttons = []
         for count in [1, 2, 3]:
             button = QPushButton(f"{count} Player{'s' if count > 1 else ''}")
             button.setMinimumSize(120, 40)
             button.setFont(QFont("Arial", 11, QFont.Bold))
-            button.setCheckable(True)  # Make button checkable
+            button.setCheckable(True)
             button.clicked.connect(lambda checked, c=count: self.set_player_count(c))
             self.player_buttons.append(button)
             player_layout.addWidget(button)
         
-        # Set default selection (3 players)
         self.player_buttons[2].setChecked(True)
         
-        # Create status label with frame
         status_frame = QFrame()
         status_frame.setFrameStyle(QFrame.StyledPanel)
-        status_frame.setObjectName("statusFrame")  # Set object name for styling
+        status_frame.setObjectName("statusFrame")
         status_layout = QVBoxLayout(status_frame)
         
         self.status_label = QLabel("Ready to launch")
         self.status_label.setAlignment(Qt.AlignCenter)
         status_layout.addWidget(self.status_label)
         
-        # Create credits label - store as instance variable for easy access
         self.credits_label = QLabel("by po1sontre")
         self.credits_label.setAlignment(Qt.AlignCenter)
         
-        # Add widgets to layout
         layout.addWidget(self.start_button)
         layout.addWidget(self.patch_button)
         layout.addWidget(self.controller_button)
@@ -240,10 +213,8 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(status_frame)
         layout.addWidget(self.credits_label)
         
-        # Apply initial theme
         self.update_theme_color(self.theme_color_name)
         
-        # Check if game directory exists and update UI accordingly
         self.check_game_directory()
 
     def check_game_directory(self):
@@ -276,19 +247,15 @@ class NightreignLauncher(QMainWindow):
 
     def update_player_count(self, count):
         try:
-            # Read the original file content
             with open(self.settings_path, 'r') as file:
                 lines = file.readlines()
             
-            # Find and update the player_count line while preserving comments and format
             for i, line in enumerate(lines):
                 if line.strip().startswith('player_count ='):
-                    # Keep the exact same indentation and format
                     indent = line[:line.find('player_count')]
                     lines[i] = f"{indent}player_count = {count}\n"
                     break
             
-            # Write back the modified content
             with open(self.settings_path, 'w') as file:
                 file.writelines(lines)
             
@@ -309,7 +276,6 @@ class NightreignLauncher(QMainWindow):
         try:
             self.status_label.setText("Patching game files...")
             
-            # Copy all files from patch directory to game directory
             for item in os.listdir(self.patch_dir):
                 source = os.path.join(self.patch_dir, item)
                 destination = os.path.join(self.game_dir, item)
@@ -332,11 +298,9 @@ class NightreignLauncher(QMainWindow):
         try:
             self.status_label.setText("Applying controller fix...")
             
-            # Create Steam directories if they don't exist
             os.makedirs(self.steam_templates_dir, exist_ok=True)
             os.makedirs(self.steam_config_dir, exist_ok=True)
             
-            # Copy template files
             for item in os.listdir(self.templates_dir):
                 source = os.path.join(self.templates_dir, item)
                 destination = os.path.join(self.steam_templates_dir, item)
@@ -348,7 +312,6 @@ class NightreignLauncher(QMainWindow):
                         shutil.rmtree(destination)
                     shutil.copytree(source, destination)
             
-            # Copy VDF file
             vdf_destination = os.path.join(self.steam_config_dir, "game_actions_480.vdf")
             shutil.copy2(self.vdf_file, vdf_destination)
             
@@ -360,14 +323,11 @@ class NightreignLauncher(QMainWindow):
             self.status_label.setText("Failed to apply controller fix")
 
     def set_player_count(self, count):
-        # Uncheck all buttons
         for button in self.player_buttons:
             button.setChecked(False)
         
-        # Check the clicked button
         self.player_buttons[count-1].setChecked(True)
         
-        # Update the INI file
         if self.update_player_count(count):
             self.status_label.setText(f"Player count set to {count}")
         else:
@@ -378,25 +338,21 @@ class NightreignLauncher(QMainWindow):
             QMessageBox.critical(self, "Error", "Game executable not found at the specified path!")
             return
 
-        # Get the selected player count from the checked button
         selected_count = next((i+1 for i, btn in enumerate(self.player_buttons) if btn.isChecked()), 3)
-        # Add this line to update the INI file before starting
         if not self.update_player_count(selected_count):
-            # If updating fails, show a message and stop the launch process
             self.status_label.setText("Failed to update player count before launch")
-            return # Stop execution if INI update fails
+            return
 
         self.status_label.setText(f"Launching game with {selected_count} player(s)...")
         
         try:
-            # Use ShellExecute to run as admin
             ctypes.windll.shell32.ShellExecuteW(
                 None, 
-                "runas",  # This requests admin privileges
+                "runas",
                 self.game_path,
-                None,  # No arguments needed
-                os.path.dirname(self.game_path),  # Working directory
-                1  # SW_SHOWNORMAL
+                None,
+                os.path.dirname(self.game_path),
+                1
             )
             self.status_label.setText("Game launched successfully!")
         except Exception as e:
@@ -405,9 +361,7 @@ class NightreignLauncher(QMainWindow):
 
     def show_settings(self):
         dialog = SettingsDialog(self)
-        # Check if dialog was accepted (Apply button pressed)
         if dialog.exec() == QDialog.Accepted:
-            # Update game directory if changed
             new_game_dir = dialog.folder_label.text()
             if new_game_dir != self.game_dir:
                 self.game_dir = new_game_dir
@@ -415,7 +369,6 @@ class NightreignLauncher(QMainWindow):
                 self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
                 self.check_game_directory()
             
-            # Get the selected color name from the dialog and update theme
             selected_color_name = dialog.selected_color_name
             if selected_color_name != self.theme_color_name:
                 self.update_theme_color(selected_color_name)
@@ -430,12 +383,9 @@ class NightreignLauncher(QMainWindow):
             "Green": "#00ff00",
             "Blue": "#4444ff"
         }
-        
-        # Store the color name and hex value
         self.theme_color_name = color_name
-        self.theme_color = color_map.get(color_name, "#00b4b4")  # Default to Teal if name not found
+        self.theme_color = color_map.get(color_name, "#00b4b4")
 
-        # Apply general stylesheet changes using the new color
         self.setStyleSheet(f"""
             QMainWindow {{
                 background-color: #000000;
@@ -457,7 +407,7 @@ class NightreignLauncher(QMainWindow):
                 color: #000000;
             }}
             QPushButton:pressed {{
-                background-color: {self.theme_color}cc; /* Slightly darker shade */
+                background-color: {self.theme_color}cc;
                 color: #000000;
             }}
             QPushButton:disabled {{
@@ -493,8 +443,6 @@ class NightreignLauncher(QMainWindow):
             }}
         """)
 
-        # Update specific widget styles that need the theme color
-        # Settings gear button
         self.settings_button.setStyleSheet(f"""
             QPushButton {{
                 background-color: transparent;
@@ -509,7 +457,6 @@ class NightreignLauncher(QMainWindow):
             }}
         """)
 
-        # Discord button
         self.discord_button.setStyleSheet(f"""
             QPushButton {{
                 background-color: #1a1a1a;
@@ -525,7 +472,6 @@ class NightreignLauncher(QMainWindow):
             }}
         """)
 
-        # Title label
         self.title_label.setStyleSheet(f"""
             color: {self.theme_color};
             font-size: 32px;
@@ -533,21 +479,18 @@ class NightreignLauncher(QMainWindow):
             margin-bottom: 20px;
         """)
 
-        # Subtitle label
         self.subtitle_label.setStyleSheet(f"""
             color: {self.theme_color};
             font-size: 16px;
             margin-bottom: 30px;
         """)
 
-        # Credits label
         self.credits_label.setStyleSheet(f"""
             color: {self.theme_color};
             font-size: 14px;
             margin-top: 20px;
         """)
 
-        # Select folder button (keep red for error state)
         self.select_folder_button.setStyleSheet("""
             QPushButton {
                 background-color: #1a1a1a;
@@ -567,7 +510,6 @@ class NightreignLauncher(QMainWindow):
             }
         """)
         
-        # Status label should remain white
         self.status_label.setStyleSheet("""
             color: #ffffff;
             font-size: 12px;
