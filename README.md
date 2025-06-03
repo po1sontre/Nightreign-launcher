@@ -1,5 +1,7 @@
 # Nightreign Launcher
 
+## Note: This launcher is intended for use with the cr@ck#d version of the game.
+
 This is a simple launcher and game manager for the Nightreign mod, built with Python and PySide6.
 
 ## Features:

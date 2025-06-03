@@ -1,5 +1,7 @@
 1- making a welcome screen on first launche that explains what to do 
-2- add lan fix as an option
-3- add a performance mode that kills unnecessary processes before starting the game
-4- add troubleshooting that will check if the game structure is correct and if steam is running and if the patch is applies completly incase the antivirus ate a file
-5- In-Launcher Patch Notes/Version History
+2- Suppress or handle error code shown when update.exe exits
+3- add troubleshooting that will check if the game structure is correct and if steam is running and if the patch is applies completly incase the antivirus ate a file
+4- add lan fix as an option
+5- add a performance mode that kills unnecessary processes before starting the game
+6- In-Launcher Patch Notes/Version History
+7- Add option in settings to select Steam folder

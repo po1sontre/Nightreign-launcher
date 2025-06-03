@@ -456,7 +456,6 @@ class NightreignLauncher(QMainWindow):
     def fix_controller(self):
         try:
             self.status_label.setText("Applying controller fix...")
-            
             os.makedirs(self.steam_templates_dir, exist_ok=True)
             os.makedirs(self.steam_config_dir, exist_ok=True)
             
