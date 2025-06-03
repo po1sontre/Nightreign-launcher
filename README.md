@@ -8,6 +8,7 @@ This is a simple launcher and game manager for the Nightreign mod, built with Py
 
 - Launch the game
 - Patch game files
+- apply the update
 - Apply controller fixes (Steam configurations)
 - Select player count
 - Customizable theme color
