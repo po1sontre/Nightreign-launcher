@@ -1305,12 +1305,38 @@ You can start using the launcher right away!
         
         # Check required files
         required_files = [
+            "amd_ags_x64.dll",
+            "bink2w64.dll",
+            "data0.bdt",
+            "data0.bhd",
+            "data1.bdt",
+            "data1.bhd",
+            "data2.bdt",
+            "data2.bhd",
+            "data3.bdt",
+            "data3.bhd",
+            "dlllist.txt",
+            "eossdk-win64-shipping.dll",
+            "eossdk-win64-shipping.so",
+            "nightreign.exe",
             "nrsc_launcher.exe",
-            "steam_api64.dll",
-            "OnlineFix64.dll",
-            "winmm.dll",
             "OnlineFix.ini",
-            "dlllist.txt"
+            "OnlineFix.url",
+            "OnlineFix64.dll",
+            "oo2core_9_win64.dll",
+            "regulation.bin",
+            "start_protected_game.exe",
+            "steam_api64.dll",
+            "steam_api64.rne",
+            "steam_emu.ini",
+            "steam_input_for_ps4_controller.vdf",
+            "steam_input_for_ps5_controller.vdf",
+            "steam_input_for_steam_controller.vdf",
+            "steam_input_for_steam_deck.vdf",
+            "steam_input_for_switch_pro_controller.vdf",
+            "steam_input_for_xboxone_controller.vdf",
+            "steam_input_manifest.vdf",
+            "winmm.dll"
         ]
         
         for file in required_files:
