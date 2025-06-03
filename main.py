@@ -185,9 +185,16 @@ class NightreignLauncher(QMainWindow):
         self.discord_button.setFixedSize(120, 35)
         self.discord_button.setFont(QFont("Arial", 11, QFont.Bold))
         self.discord_button.clicked.connect(lambda: webbrowser.open("https://discord.gg/YDtHQNqnqj"))
-        
+
+        # Add About button
+        self.about_button = QPushButton("About")
+        self.about_button.setFixedSize(80, 35) # Adjust size as needed
+        self.about_button.setFont(QFont("Arial", 11, QFont.Bold))
+        self.about_button.clicked.connect(self.show_about_dialog)
+
         top_layout.addWidget(self.settings_button)
         top_layout.addWidget(self.discord_button)
+        top_layout.addWidget(self.about_button) # Add the new button to the layout
         top_layout.addStretch()
         
         self.title_label = QLabel("NIGHTREIGN")
@@ -536,7 +543,7 @@ class NightreignLauncher(QMainWindow):
                  # but as a fallback, if the folder text from the dialog is somehow invalid,
                  # we could show a warning here too.
                  pass # Or add a warning if deemed necessary
-    
+
     def update_theme_color(self, color_name):
         color_map = {
             "Teal": "#00b4b4",
@@ -636,6 +643,22 @@ class NightreignLauncher(QMainWindow):
             }}
         """)
 
+        # Apply similar style to the About button
+        self.about_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #1a1a1a;
+                color: {self.theme_color};
+                border: 2px solid {self.theme_color};
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: {self.theme_color};
+                color: #000000;
+            }}
+        """)
+
         self.title_label.setStyleSheet(f"""
             color: {self.theme_color};
             font-size: 32px;
@@ -678,6 +701,33 @@ class NightreignLauncher(QMainWindow):
             color: #ffffff;
             font-size: 12px;
         """)
+
+    # Add show_about_dialog method
+    def show_about_dialog(self):
+        # This method will be implemented next
+        about_text = """
+Nightreign Launcher
+Version: 1.0.0 (Example)
+
+This is a fan-made launcher for Elden Ring Nightreign with the Seamless Co-op mod.
+
+Features:
+- Start the game (runs with admin privileges)
+- Update the game (opens a separate updater app)
+- Patch game files (replaces necessary files in your game directory)
+- Apply controller fix (installs a custom Steam template — you'll still need to select it manually via Steam overlay in-game)
+- Backup save files (currently under development)
+- Customizable theme color (change via the gear icon)
+- Game path selection (set/change via the gear icon)
+
+Note: The player count is preset to 3. This works fine and usually doesn't need to be changed.
+
+Developed by: po1sontre
+
+Disclaimer: This launcher is an independent project and is not officially affiliated with the creators of the base game, the Seamless Co-op mod, or any associated patch/update developers.
+"""
+
+        QMessageBox.about(self, "About Nightreign Launcher", about_text)
 
 def main():
     app = QApplication(sys.argv)
