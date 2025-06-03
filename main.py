@@ -468,7 +468,7 @@ Quick Help:
    • Start the game with admin privileges
 
 2. Common Issues:
-   • If the game doesn't start or crashes, try "Troubleshoot" this will check if the game is installed correctly and if the patch is applied completly incase the antivirus ate a file
+   • If the game doesn't start or crashes, try "Troubleshoot" this will check if the game is installed correctly and if the patch is applied completely incase the antivirus ate a file
    • If controller doesn't work, use "Controller Fix" this will install the custom steam controller configuration
    • If update fails, make sure you selected the correct folder
 
@@ -935,6 +935,23 @@ class NightreignLauncher(QMainWindow):
             
             self.status_label.setText("Game patched successfully!")
             QMessageBox.information(self, "Success", "Game files have been patched successfully!")
+            
+            # Move regulation.bin after successful patching
+            if os.path.exists(self.regulation_path):
+                try:
+                    destination = os.path.join(self.game_dir, "regulation.bin")
+                    shutil.copy2(self.regulation_path, destination)
+                    self.status_label.setText("Game patched successfully and regulation file moved!")
+                    # No extra messagebox needed here, the patch success one is enough.
+                except Exception as e:
+                    self.status_label.setText("Game patched successfully but failed to move regulation file!")
+                    QMessageBox.warning(self, "Warning", f"Game patched successfully but failed to move regulation file: {str(e)}")
+            else:
+                 # This case should ideally not happen if update.exe was run and downloaded it,
+                 # but as a fallback, inform the user if regulation.bin is missing.
+                 self.status_label.setText("Game patched successfully, but regulation.bin was not found!")
+                 QMessageBox.warning(self, "Warning", "Game patched successfully, but regulation.bin was not found in the launcher directory. Please run Update Game first.")
+
             return True
             
         except Exception as e:
