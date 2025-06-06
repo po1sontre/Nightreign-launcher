@@ -83,6 +83,32 @@ def save_settings(config):
     with open(get_config_path(), 'w') as f:
         config.write(f)
 
+def check_antivirus_interference():
+    """Check for common antivirus processes that might interfere with the launcher"""
+    try:
+        import psutil
+        antivirus_processes = {
+            'avast': ['AvastSvc.exe', 'AvastUI.exe'],
+            'avg': ['AVGSvc.exe', 'AVGUI.exe'],
+            'bitdefender': ['bdredline.exe', 'bdagent.exe'],
+            'kaspersky': ['avp.exe', 'kavstart.exe'],
+            'mcafee': ['mcshield.exe', 'mcafee.exe'],
+            'norton': ['NortonSecurity.exe', 'NS.exe'],
+            'windows defender': ['MsMpEng.exe', 'NisSrv.exe'],
+            'malwarebytes': ['MBAMService.exe', 'mbam.exe']
+        }
+        
+        detected_av = []
+        for av_name, processes in antivirus_processes.items():
+            for proc in psutil.process_iter(['name']):
+                if proc.info['name'] in processes:
+                    detected_av.append(av_name)
+                    break
+        
+        return detected_av
+    except ImportError:
+        return []
+
 class WelcomeDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -548,7 +574,15 @@ class NightreignLauncher(QMainWindow):
         self.game_dir = self.config['Settings']['game_dir']
         self.game_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
         self.settings_path = os.path.join(self.game_dir, "SeamlessCoop", "nrsc_settings.ini")
-        self.patch_dir = resource_path("online_patch")
+        
+        # Set patch directory to be in the same directory as the executable
+        if hasattr(sys, '_MEIPASS'):
+            # When running as exe, look in the same directory as the exe
+            self.patch_dir = os.path.join(os.path.dirname(sys.executable), "online_patch")
+        else:
+            # When running as script, look in the same directory as the script
+            self.patch_dir = os.path.join(os.path.dirname(__file__), "online_patch")
+            
         self.templates_dir = resource_path("templates")
         
         # Load saved Steam directory or use default
@@ -572,6 +606,24 @@ class NightreignLauncher(QMainWindow):
         
         # Get user's save directory
         self.save_dir = get_user_save_directory()
+        
+        # Check for antivirus interference only on first launch
+        if 'first_launch' not in self.config['Settings'] or self.config['Settings'].getboolean('first_launch'):
+            detected_av = check_antivirus_interference()
+            if detected_av:
+                QMessageBox.warning(self, "Antivirus Detected", 
+                    f"Detected antivirus software: {', '.join(detected_av)}\n\n"
+                    "Your antivirus might interfere with the launcher. Please add these folders to your antivirus exclusions:\n\n"
+                    f"1. This launcher's folder:\n   {os.path.dirname(sys.executable)}\n\n"
+                    f"2. Your Elden Ring Nightreign folder:\n   {self.game_dir}\n\n"
+                    "If you're still having issues:\n"
+                    "1. Temporarily disable real-time protection when using the launcher\n"
+                    "2. Check your antivirus quarantine for any deleted files\n"
+                    "3. Make sure to run the launcher as administrator")
+            
+            # Mark first launch as complete
+            self.config['Settings']['first_launch'] = 'False'
+            save_settings(self.config)
         
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -912,7 +964,7 @@ class NightreignLauncher(QMainWindow):
 
     def patch_game(self):
         if not os.path.exists(self.patch_dir):
-            QMessageBox.critical(self, "Error", "Patch files not found!")
+            QMessageBox.critical(self, "Error", "Patch files not found! Please make sure the 'online_patch' folder is in the same directory as the launcher.")
             return False
             
         if not os.path.exists(self.game_dir):
@@ -922,16 +974,70 @@ class NightreignLauncher(QMainWindow):
         try:
             self.status_label.setText("Patching game files...")
             
-            for item in os.listdir(self.patch_dir):
-                source = os.path.join(self.patch_dir, item)
-                destination = os.path.join(self.game_dir, item)
-                
-                if os.path.isfile(source):
-                    shutil.copy2(source, destination)
-                elif os.path.isdir(source):
-                    if os.path.exists(destination):
-                        shutil.rmtree(destination)
-                    shutil.copytree(source, destination)
+            # First check if we have all required files
+            required_files = [
+                "OnlineFix64.dll",
+                "OnlineFix.ini",
+                "OnlineFix.url",
+                "dlllist.txt",
+                "nrsc_launcher.exe",
+                "steam_api64.dll",
+                "winmm.dll"
+            ]
+            
+            missing_files = []
+            for file in required_files:
+                if not os.path.exists(os.path.join(self.patch_dir, file)):
+                    missing_files.append(file)
+            
+            if missing_files:
+                QMessageBox.critical(self, "Error", 
+                    f"Missing required files in online_patch folder:\n{', '.join(missing_files)}\n\n"
+                    "This might be caused by your antivirus. Please:\n"
+                    "1. Check your antivirus quarantine\n"
+                    "2. Add the launcher folder to antivirus exclusions\n"
+                    "3. Temporarily disable real-time protection")
+                return False
+            
+            # Check for SeamlessCoop folder
+            seamless_dir = os.path.join(self.patch_dir, "SeamlessCoop")
+            if not os.path.exists(seamless_dir):
+                QMessageBox.critical(self, "Error", 
+                    "SeamlessCoop folder not found in online_patch directory!\n\n"
+                    "This might be caused by your antivirus. Please:\n"
+                    "1. Check your antivirus quarantine\n"
+                    "2. Add the launcher folder to antivirus exclusions\n"
+                    "3. Temporarily disable real-time protection")
+                return False
+            
+            # Copy all files from online_patch to game directory
+            try:
+                for item in os.listdir(self.patch_dir):
+                    source = os.path.join(self.patch_dir, item)
+                    destination = os.path.join(self.game_dir, item)
+                    
+                    if os.path.isfile(source):
+                        shutil.copy2(source, destination)
+                    elif os.path.isdir(source):
+                        if os.path.exists(destination):
+                            shutil.rmtree(destination)
+                        shutil.copytree(source, destination)
+            except PermissionError:
+                QMessageBox.critical(self, "Error", 
+                    "Permission denied while copying files.\n\n"
+                    "This is likely caused by your antivirus. Please:\n"
+                    "1. Add the game folder to antivirus exclusions\n"
+                    "2. Temporarily disable real-time protection\n"
+                    "3. Run the launcher as administrator")
+                return False
+            except Exception as e:
+                QMessageBox.critical(self, "Error", 
+                    f"Failed to copy files: {str(e)}\n\n"
+                    "This might be caused by your antivirus. Please:\n"
+                    "1. Check your antivirus quarantine\n"
+                    "2. Add the launcher and game folders to antivirus exclusions\n"
+                    "3. Temporarily disable real-time protection")
+                return False
             
             self.status_label.setText("Game patched successfully!")
             QMessageBox.information(self, "Success", "Game files have been patched successfully!")
@@ -942,20 +1048,30 @@ class NightreignLauncher(QMainWindow):
                     destination = os.path.join(self.game_dir, "regulation.bin")
                     shutil.copy2(self.regulation_path, destination)
                     self.status_label.setText("Game patched successfully and regulation file moved!")
-                    # No extra messagebox needed here, the patch success one is enough.
                 except Exception as e:
                     self.status_label.setText("Game patched successfully but failed to move regulation file!")
-                    QMessageBox.warning(self, "Warning", f"Game patched successfully but failed to move regulation file: {str(e)}")
+                    QMessageBox.warning(self, "Warning", 
+                        f"Game patched successfully but failed to move regulation file: {str(e)}\n\n"
+                        "This might be caused by your antivirus. Please:\n"
+                        "1. Check your antivirus quarantine\n"
+                        "2. Add the game folder to antivirus exclusions\n"
+                        "3. Temporarily disable real-time protection")
             else:
-                 # This case should ideally not happen if update.exe was run and downloaded it,
-                 # but as a fallback, inform the user if regulation.bin is missing.
-                 self.status_label.setText("Game patched successfully, but regulation.bin was not found!")
-                 QMessageBox.warning(self, "Warning", "Game patched successfully, but regulation.bin was not found in the launcher directory. Please run Update Game first.")
+                self.status_label.setText("Game patched successfully, but regulation.bin was not found!")
+                QMessageBox.warning(self, "Warning", 
+                    "Game patched successfully, but regulation.bin was not found in the launcher directory.\n"
+                    "Please run Update Game first.\n\n"
+                    "If the file is missing, check your antivirus quarantine.")
 
             return True
             
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to patch game: {str(e)}")
+            QMessageBox.critical(self, "Error", 
+                f"Failed to patch game: {str(e)}\n\n"
+                "This might be caused by your antivirus. Please:\n"
+                "1. Check your antivirus quarantine\n"
+                "2. Add the launcher and game folders to antivirus exclusions\n"
+                "3. Temporarily disable real-time protection")
             self.status_label.setText("Failed to patch game")
             return False
 
@@ -1052,7 +1168,8 @@ class NightreignLauncher(QMainWindow):
         self.status_label.setText(f"Launching game with {selected_count} player(s)...")
         
         try:
-            ctypes.windll.shell32.ShellExecuteW(
+            # First try to run as admin using ShellExecuteW
+            result = ctypes.windll.shell32.ShellExecuteW(
                 None, 
                 "runas",
                 self.game_path,
@@ -1060,9 +1177,54 @@ class NightreignLauncher(QMainWindow):
                 os.path.dirname(self.game_path),
                 1
             )
+            
+            # Check if ShellExecuteW failed
+            if result <= 32:  # ShellExecuteW returns values <= 32 on error
+                error_codes = {
+                    0: "Out of memory",
+                    2: "File not found",
+                    3: "Path not found",
+                    5: "Access denied",
+                    8: "Out of memory",
+                    26: "Sharing violation",
+                    27: "Association incomplete",
+                    28: "DDE timeout",
+                    29: "DDE fail",
+                    30: "DDE busy",
+                    31: "No association",
+                    32: "DLL not found"
+                }
+                error_msg = error_codes.get(result, f"Unknown error (code: {result})")
+                
+                # Try alternative method using subprocess
+                try:
+                    subprocess.run(
+                        [self.game_path],
+                        cwd=os.path.dirname(self.game_path),
+                        shell=True,
+                        check=True
+                    )
+                except subprocess.CalledProcessError as e:
+                    QMessageBox.critical(self, "Error", 
+                        f"Failed to launch game with admin privileges.\n\n"
+                        f"First attempt error: {error_msg}\n"
+                        f"Second attempt error: {str(e)}\n\n"
+                        "Please try the following:\n"
+                        "1. Right-click the launcher and select 'Run as administrator'\n"
+                        "2. Make sure your antivirus is not blocking the game\n"
+                        "3. Check if the game folder has proper permissions")
+                    self.status_label.setText("Failed to launch game")
+                    return
+                
             self.status_label.setText("Game launched successfully!")
+            
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to launch game: {str(e)}")
+            QMessageBox.critical(self, "Error", 
+                f"Failed to launch game: {str(e)}\n\n"
+                "Please try the following:\n"
+                "1. Right-click the launcher and select 'Run as administrator'\n"
+                "2. Make sure your antivirus is not blocking the game\n"
+                "3. Check if the game folder has proper permissions")
             self.status_label.setText("Failed to launch game")
 
     def show_settings(self):
