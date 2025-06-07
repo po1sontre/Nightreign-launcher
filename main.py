@@ -559,6 +559,188 @@ Disclaimer: This launcher is an independent project and is not officially affili
             }}
         """)
 
+class ModMenuDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Mod Menu")
+        self.setMinimumSize(400, 300)
+        
+        # Create backup of original regulation.bin if it doesn't exist
+        self.create_original_backup()
+        
+        layout = QVBoxLayout(self)
+        
+        # Title
+        title = QLabel("Select a Mod")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        # Mod list
+        self.mod_list = QComboBox()
+        self.mod_list.setMinimumHeight(40)
+        self.mod_list.setFont(QFont("Arial", 12))
+        
+        # Get list of mods from the mods directory
+        mods_dir = os.path.join(os.path.dirname(sys.executable), "mods")
+        if not os.path.exists(mods_dir):
+            mods_dir = os.path.join(os.path.dirname(__file__), "mods")
+        
+        if os.path.exists(mods_dir):
+            for mod_folder in os.listdir(mods_dir):
+                mod_path = os.path.join(mods_dir, mod_folder)
+                if os.path.isdir(mod_path) and os.path.exists(os.path.join(mod_path, "regulation.bin")):
+                    self.mod_list.addItem(mod_folder)
+        
+        layout.addWidget(self.mod_list)
+        
+        # Description
+        self.description = QLabel("Select a mod to apply its regulation.bin file to your game.")
+        self.description.setWordWrap(True)
+        self.description.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.description)
+        
+        # Button container
+        button_container = QWidget()
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setSpacing(10)
+        
+        # Apply button
+        apply_button = QPushButton("Apply Mod")
+        apply_button.setMinimumHeight(40)
+        apply_button.setFont(QFont("Arial", 12, QFont.Bold))
+        apply_button.clicked.connect(self.apply_mod)
+        button_layout.addWidget(apply_button)
+        
+        # Reset button
+        reset_button = QPushButton("Reset to Normal")
+        reset_button.setMinimumHeight(40)
+        reset_button.setFont(QFont("Arial", 12, QFont.Bold))
+        reset_button.clicked.connect(self.reset_to_normal)
+        button_layout.addWidget(reset_button)
+        
+        layout.addWidget(button_container)
+        
+        # Close button
+        close_button = QPushButton("Close")
+        close_button.setMinimumHeight(40)
+        close_button.setFont(QFont("Arial", 12))
+        close_button.clicked.connect(self.accept)
+        layout.addWidget(close_button)
+        
+        # Style the dialog
+        self.setStyleSheet(f"""
+            QDialog {{
+                background-color: #000000;
+                color: #ffffff;
+            }}
+            QLabel {{
+                color: #ffffff;
+            }}
+            QPushButton {{
+                background-color: #1a1a1a;
+                color: white;
+                border: 2px solid {parent.theme_color if parent else '#00b4b4'};
+                border-radius: 5px;
+                padding: 10px;
+                margin: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: {parent.theme_color if parent else '#00b4b4'};
+                color: #000000;
+            }}
+            QComboBox {{
+                background-color: #1a1a1a;
+                color: white;
+                border: 2px solid {parent.theme_color if parent else '#00b4b4'};
+                border-radius: 5px;
+                padding: 5px;
+                margin: 5px;
+            }}
+            QComboBox:hover {{
+                border-color: {parent.theme_color if parent else '#00b4b4'};
+            }}
+            QComboBox::drop-down {{
+                border: none;
+            }}
+            QComboBox::down-arrow {{
+                image: none;
+                border: none;
+            }}
+        """)
+    
+    def create_original_backup(self):
+        """Create a backup of the original regulation.bin if it doesn't exist"""
+        try:
+            game_regulation = os.path.join(self.parent().game_dir, "regulation.bin")
+            original_regulation = os.path.join(os.path.dirname(sys.executable), "regulation.bin")
+            if not os.path.exists(original_regulation):
+                original_regulation = os.path.join(os.path.dirname(__file__), "regulation.bin")
+            
+            # Check if we have the original regulation.bin
+            if not os.path.exists(original_regulation):
+                return
+            
+            # Create backups directory if it doesn't exist
+            backups_dir = os.path.join(self.parent().game_dir, "regulation_backups")
+            os.makedirs(backups_dir, exist_ok=True)
+            
+            # Check if we already have a backup of the original
+            original_backup = os.path.join(backups_dir, "regulation_original.bin")
+            if not os.path.exists(original_backup):
+                # Create backup of original regulation.bin
+                shutil.copy2(original_regulation, original_backup)
+        except Exception as e:
+            print(f"Failed to create original backup: {str(e)}")
+    
+    def apply_mod(self):
+        if self.mod_list.currentText():
+            try:
+                # Get paths
+                mods_dir = os.path.join(os.path.dirname(sys.executable), "mods")
+                if not os.path.exists(mods_dir):
+                    mods_dir = os.path.join(os.path.dirname(__file__), "mods")
+                
+                mod_folder = os.path.join(mods_dir, self.mod_list.currentText())
+                mod_regulation = os.path.join(mod_folder, "regulation.bin")
+                game_regulation = os.path.join(self.parent().game_dir, "regulation.bin")
+                
+                # Check if mod regulation.bin exists
+                if not os.path.exists(mod_regulation):
+                    QMessageBox.critical(self, "Error", f"regulation.bin not found in {mod_folder}")
+                    return
+                
+                # Copy mod regulation.bin to game folder
+                shutil.copy2(mod_regulation, game_regulation)
+                
+                QMessageBox.information(self, "Success", 
+                    f"Successfully applied {self.mod_list.currentText()} mod!")
+                
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to apply mod: {str(e)}")
+    
+    def reset_to_normal(self):
+        try:
+            # Get paths
+            game_regulation = os.path.join(self.parent().game_dir, "regulation.bin")
+            original_backup = os.path.join(self.parent().game_dir, "regulation_backups", "regulation_original.bin")
+            
+            # Check if original backup exists
+            if not os.path.exists(original_backup):
+                QMessageBox.critical(self, "Error", 
+                    "Original regulation.bin backup not found.\n"
+                    "Please run Update Game first to get the original file.")
+                return
+            
+            # Copy original backup to game folder
+            shutil.copy2(original_backup, game_regulation)
+            
+            QMessageBox.information(self, "Success", 
+                "Successfully reset to normal regulation.bin!")
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to reset regulation.bin: {str(e)}")
+
 class NightreignLauncher(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -579,12 +761,16 @@ class NightreignLauncher(QMainWindow):
         if hasattr(sys, '_MEIPASS'):
             # When running as exe, look in the same directory as the exe
             self.patch_dir = os.path.join(os.path.dirname(sys.executable), "online_patch")
+            # First try to get templates from the executable
+            self.templates_dir = resource_path("templates")
+            # If templates don't exist in the executable, look next to the exe
+            if not os.path.exists(self.templates_dir):
+                self.templates_dir = os.path.join(os.path.dirname(sys.executable), "templates")
         else:
             # When running as script, look in the same directory as the script
             self.patch_dir = os.path.join(os.path.dirname(__file__), "online_patch")
+            self.templates_dir = os.path.join(os.path.dirname(__file__), "templates")
             
-        self.templates_dir = resource_path("templates")
-        
         # Load saved Steam directory or use default
         if 'steam_dir' in self.config['Settings']:
             self.steam_dir = self.config['Settings']['steam_dir']
@@ -716,6 +902,12 @@ class NightreignLauncher(QMainWindow):
         self.backup_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.backup_button.clicked.connect(self.backup_saves)
         
+        # Add mods button
+        self.mods_button = QPushButton("Mods")
+        self.mods_button.setMinimumSize(250, 55)
+        self.mods_button.setFont(QFont("Arial", 13, QFont.Bold))
+        self.mods_button.clicked.connect(self.show_mod_menu)
+        
         self.select_folder_button = QPushButton("Select Nightreign Game Folder")
         self.select_folder_button.setMinimumSize(250, 55)
         self.select_folder_button.setFont(QFont("Arial", 13, QFont.Bold))
@@ -755,6 +947,7 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(self.troubleshoot_button)
         layout.addWidget(self.controller_button)
         layout.addWidget(self.backup_button)
+        layout.addWidget(self.mods_button)
         layout.addWidget(self.select_folder_button)
         layout.addWidget(player_container)
         layout.addStretch()
@@ -1078,28 +1271,125 @@ class NightreignLauncher(QMainWindow):
     def fix_controller(self):
         try:
             self.status_label.setText("Applying controller fix...")
-            os.makedirs(self.steam_templates_dir, exist_ok=True)
-            os.makedirs(self.steam_config_dir, exist_ok=True)
             
-            for item in os.listdir(self.templates_dir):
-                source = os.path.join(self.templates_dir, item)
-                destination = os.path.join(self.steam_templates_dir, item)
+            # Check if we have write permissions to Steam directories
+            try:
+                # Test write permissions by creating a temporary file
+                test_file = os.path.join(self.steam_templates_dir, "test_write.tmp")
+                with open(test_file, 'w') as f:
+                    f.write("test")
+                os.remove(test_file)
+            except (PermissionError, OSError):
+                QMessageBox.critical(self, "Error", 
+                    "No permission to write to Steam directories.\n\n"
+                    "Please run the launcher as administrator and make sure:\n"
+                    "1. Steam is not running\n"
+                    "2. No other programs are using Steam files\n"
+                    "3. Your antivirus is not blocking access")
+                self.status_label.setText("Failed to apply controller fix - Permission denied")
+                return
+            
+            # Create Steam directories if they don't exist
+            try:
+                os.makedirs(self.steam_templates_dir, exist_ok=True)
+                os.makedirs(self.steam_config_dir, exist_ok=True)
+            except (PermissionError, OSError) as e:
+                QMessageBox.critical(self, "Error", 
+                    f"Failed to create Steam directories: {str(e)}\n\n"
+                    "Please run the launcher as administrator")
+                self.status_label.setText("Failed to create Steam directories")
+                return
+            
+            # First, copy all template files to Steam's controller_base/templates directory
+            if not os.path.exists(self.templates_dir):
+                QMessageBox.critical(self, "Error", 
+                    "Templates directory not found in launcher directory.\n"
+                    "Please reinstall the launcher.")
+                self.status_label.setText("Failed to apply controller fix - Missing templates")
+                return
                 
-                if os.path.isfile(source):
-                    shutil.copy2(source, destination)
-                elif os.path.isdir(source):
+            # Copy all files from templates directory to Steam's templates directory
+            try:
+                for item in os.listdir(self.templates_dir):
+                    source = os.path.join(self.templates_dir, item)
+                    destination = os.path.join(self.steam_templates_dir, item)
+                    
+                    # If destination exists, try to remove it first
                     if os.path.exists(destination):
-                        shutil.rmtree(destination)
-                    shutil.copytree(source, destination)
+                        try:
+                            if os.path.isfile(destination):
+                                os.remove(destination)
+                            elif os.path.isdir(destination):
+                                shutil.rmtree(destination)
+                        except (PermissionError, OSError) as e:
+                            QMessageBox.critical(self, "Error", 
+                                f"Failed to remove existing file: {destination}\n\n"
+                                "Please make sure Steam is not running and try again.")
+                            self.status_label.setText("Failed to apply controller fix - Cannot remove existing files")
+                            return
+                    
+                    # Copy the file/directory
+                    try:
+                        if os.path.isfile(source):
+                            shutil.copy2(source, destination)
+                        elif os.path.isdir(source):
+                            shutil.copytree(source, destination)
+                    except (PermissionError, OSError) as e:
+                        QMessageBox.critical(self, "Error", 
+                            f"Failed to copy: {source}\n\n"
+                            "Please make sure Steam is not running and try again.")
+                        self.status_label.setText("Failed to apply controller fix - Copy failed")
+                        return
+            except Exception as e:
+                QMessageBox.critical(self, "Error", 
+                    f"Failed to copy template files: {str(e)}\n\n"
+                    "Please make sure Steam is not running and try again.")
+                self.status_label.setText("Failed to apply controller fix - Copy failed")
+                return
             
-            vdf_destination = os.path.join(self.steam_config_dir, "game_actions_480.vdf")
-            shutil.copy2(self.vdf_file, vdf_destination)
+            # Then, copy the VDF file to Steam's controller_config directory
+            if not os.path.exists(self.vdf_file):
+                QMessageBox.critical(self, "Error", 
+                    "game_actions_480.vdf not found in launcher directory.\n"
+                    "Please reinstall the launcher.")
+                self.status_label.setText("Failed to apply controller fix - Missing VDF file")
+                return
+                
+            try:
+                vdf_destination = os.path.join(self.steam_config_dir, "game_actions_480.vdf")
+                # Remove existing VDF file if it exists
+                if os.path.exists(vdf_destination):
+                    os.remove(vdf_destination)
+                shutil.copy2(self.vdf_file, vdf_destination)
+            except (PermissionError, OSError) as e:
+                QMessageBox.critical(self, "Error", 
+                    f"Failed to copy VDF file: {str(e)}\n\n"
+                    "Please make sure Steam is not running and try again.")
+                self.status_label.setText("Failed to apply controller fix - VDF copy failed")
+                return
             
             self.status_label.setText("Controller fix applied successfully!")
-            QMessageBox.information(self, "Success", "Controller configuration has been updated successfully!")
+            QMessageBox.information(self, "Success", 
+                "Controller configuration has been updated successfully!\n\n"
+                f"Templates copied to: {self.steam_templates_dir}\n"
+                f"VDF file copied to: {self.steam_config_dir}\n\n"
+                "You can now restart Steam to apply the changes.")
             
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to apply controller fix: {str(e)}")
+            error_msg = str(e)
+            if "Permission denied" in error_msg:
+                error_msg = "Permission denied. Please run the launcher as administrator."
+            elif "not found" in error_msg:
+                error_msg = f"Required files not found: {error_msg}"
+            
+            QMessageBox.critical(self, "Error", 
+                f"Failed to apply controller fix: {error_msg}\n\n"
+                "Please make sure:\n"
+                "1. You're running the launcher as administrator\n"
+                "2. Steam is not running\n"
+                "3. Steam is installed in the default location\n"
+                "4. All required files are present in the launcher directory\n"
+                "5. Your antivirus is not blocking access")
             self.status_label.setText("Failed to apply controller fix")
 
     def set_player_count(self, count):
@@ -1554,6 +1844,11 @@ You can start using the launcher right away!
     def show_help(self):
         """Show the help dialog"""
         dialog = HelpDialog(self)
+        dialog.exec()
+
+    def show_mod_menu(self):
+        """Show the mod menu dialog"""
+        dialog = ModMenuDialog(self)
         dialog.exec()
 
 def main():
