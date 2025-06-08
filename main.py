@@ -21,6 +21,82 @@ def resource_path(relative_path):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), relative_path)
 
+def safe_file_operation(source, destination, operation_type='copy', retries=3, delay=1):
+    """
+    Safely perform file operations with retries and error handling
+    
+    Args:
+        source (str): Source file/directory path
+        destination (str): Destination file/directory path
+        operation_type (str): Type of operation ('copy', 'move', 'delete')
+        retries (int): Number of retry attempts
+        delay (int): Delay between retries in seconds
+    
+    Returns:
+        bool: True if operation succeeded, False otherwise
+    """
+    import time
+    from pathlib import Path
+    
+    def handle_error(e, attempt):
+        if attempt < retries:
+            time.sleep(delay)
+            return True
+        return False
+    
+    for attempt in range(retries):
+        try:
+            # Ensure parent directory exists
+            Path(destination).parent.mkdir(parents=True, exist_ok=True)
+            
+            if operation_type == 'copy':
+                if os.path.isfile(source):
+                    # For files, use copy2 to preserve metadata
+                    shutil.copy2(source, destination)
+                else:
+                    # For directories, use copytree
+                    if os.path.exists(destination):
+                        shutil.rmtree(destination)
+                    shutil.copytree(source, destination)
+            
+            elif operation_type == 'move':
+                # For moving, use copy2 + remove to ensure atomic operation
+                if os.path.isfile(source):
+                    shutil.copy2(source, destination)
+                    os.remove(source)
+                else:
+                    shutil.copytree(source, destination)
+                    shutil.rmtree(source)
+            
+            elif operation_type == 'delete':
+                if os.path.isfile(destination):
+                    os.remove(destination)
+                elif os.path.isdir(destination):
+                    shutil.rmtree(destination)
+            
+            # Verify the operation
+            if operation_type in ['copy', 'move']:
+                if os.path.isfile(source):
+                    if not os.path.exists(destination) or os.path.getsize(source) != os.path.getsize(destination):
+                        raise Exception("File verification failed")
+                else:
+                    if not os.path.exists(destination):
+                        raise Exception("Directory verification failed")
+            
+            return True
+            
+        except PermissionError as e:
+            if not handle_error(e, attempt):
+                raise Exception(f"Permission denied after {retries} attempts: {str(e)}")
+        except OSError as e:
+            if not handle_error(e, attempt):
+                raise Exception(f"OS error after {retries} attempts: {str(e)}")
+        except Exception as e:
+            if not handle_error(e, attempt):
+                raise Exception(f"Operation failed after {retries} attempts: {str(e)}")
+    
+    return False
+
 def get_user_save_directory():
     """ Get the current user's Nightreign save directory """
     username = os.getenv('USERNAME')
@@ -908,6 +984,12 @@ class NightreignLauncher(QMainWindow):
         self.mods_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.mods_button.clicked.connect(self.show_mod_menu)
         
+        # Add performance settings button
+        self.performance_button = QPushButton("Apply Performance Settings")
+        self.performance_button.setMinimumSize(250, 55)
+        self.performance_button.setFont(QFont("Arial", 13, QFont.Bold))
+        self.performance_button.clicked.connect(self.apply_performance_settings)
+        
         self.select_folder_button = QPushButton("Select Nightreign Game Folder")
         self.select_folder_button.setMinimumSize(250, 55)
         self.select_folder_button.setFont(QFont("Arial", 13, QFont.Bold))
@@ -948,6 +1030,7 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(self.controller_button)
         layout.addWidget(self.backup_button)
         layout.addWidget(self.mods_button)
+        layout.addWidget(self.performance_button)
         layout.addWidget(self.select_folder_button)
         layout.addWidget(player_container)
         layout.addStretch()
@@ -1203,26 +1286,15 @@ class NightreignLauncher(QMainWindow):
                     "3. Temporarily disable real-time protection")
                 return False
             
-            # Copy all files from online_patch to game directory
+            # Copy all files from online_patch to game directory using safe_file_operation
             try:
                 for item in os.listdir(self.patch_dir):
                     source = os.path.join(self.patch_dir, item)
                     destination = os.path.join(self.game_dir, item)
                     
-                    if os.path.isfile(source):
-                        shutil.copy2(source, destination)
-                    elif os.path.isdir(source):
-                        if os.path.exists(destination):
-                            shutil.rmtree(destination)
-                        shutil.copytree(source, destination)
-            except PermissionError:
-                QMessageBox.critical(self, "Error", 
-                    "Permission denied while copying files.\n\n"
-                    "This is likely caused by your antivirus. Please:\n"
-                    "1. Add the game folder to antivirus exclusions\n"
-                    "2. Temporarily disable real-time protection\n"
-                    "3. Run the launcher as administrator")
-                return False
+                    if not safe_file_operation(source, destination, 'copy'):
+                        raise Exception(f"Failed to copy {item}")
+            
             except Exception as e:
                 QMessageBox.critical(self, "Error", 
                     f"Failed to copy files: {str(e)}\n\n"
@@ -1239,7 +1311,8 @@ class NightreignLauncher(QMainWindow):
             if os.path.exists(self.regulation_path):
                 try:
                     destination = os.path.join(self.game_dir, "regulation.bin")
-                    shutil.copy2(self.regulation_path, destination)
+                    if not safe_file_operation(self.regulation_path, destination, 'copy'):
+                        raise Exception("Failed to copy regulation.bin")
                     self.status_label.setText("Game patched successfully and regulation file moved!")
                 except Exception as e:
                     self.status_label.setText("Game patched successfully but failed to move regulation file!")
@@ -1316,30 +1389,13 @@ class NightreignLauncher(QMainWindow):
                     
                     # If destination exists, try to remove it first
                     if os.path.exists(destination):
-                        try:
-                            if os.path.isfile(destination):
-                                os.remove(destination)
-                            elif os.path.isdir(destination):
-                                shutil.rmtree(destination)
-                        except (PermissionError, OSError) as e:
-                            QMessageBox.critical(self, "Error", 
-                                f"Failed to remove existing file: {destination}\n\n"
-                                "Please make sure Steam is not running and try again.")
-                            self.status_label.setText("Failed to apply controller fix - Cannot remove existing files")
-                            return
+                        if not safe_file_operation(destination, destination, 'delete'):
+                            raise Exception(f"Failed to remove existing file: {destination}")
                     
                     # Copy the file/directory
-                    try:
-                        if os.path.isfile(source):
-                            shutil.copy2(source, destination)
-                        elif os.path.isdir(source):
-                            shutil.copytree(source, destination)
-                    except (PermissionError, OSError) as e:
-                        QMessageBox.critical(self, "Error", 
-                            f"Failed to copy: {source}\n\n"
-                            "Please make sure Steam is not running and try again.")
-                        self.status_label.setText("Failed to apply controller fix - Copy failed")
-                        return
+                    if not safe_file_operation(source, destination, 'copy'):
+                        raise Exception(f"Failed to copy: {source}")
+            
             except Exception as e:
                 QMessageBox.critical(self, "Error", 
                     f"Failed to copy template files: {str(e)}\n\n"
@@ -1359,9 +1415,13 @@ class NightreignLauncher(QMainWindow):
                 vdf_destination = os.path.join(self.steam_config_dir, "game_actions_480.vdf")
                 # Remove existing VDF file if it exists
                 if os.path.exists(vdf_destination):
-                    os.remove(vdf_destination)
-                shutil.copy2(self.vdf_file, vdf_destination)
-            except (PermissionError, OSError) as e:
+                    if not safe_file_operation(vdf_destination, vdf_destination, 'delete'):
+                        raise Exception(f"Failed to remove existing VDF file: {vdf_destination}")
+                
+                if not safe_file_operation(self.vdf_file, vdf_destination, 'copy'):
+                    raise Exception(f"Failed to copy VDF file: {self.vdf_file}")
+                
+            except Exception as e:
                 QMessageBox.critical(self, "Error", 
                     f"Failed to copy VDF file: {str(e)}\n\n"
                     "Please make sure Steam is not running and try again.")
@@ -1850,6 +1910,89 @@ You can start using the launcher right away!
         """Show the mod menu dialog"""
         dialog = ModMenuDialog(self)
         dialog.exec()
+
+    def apply_performance_settings(self):
+        """Apply performance settings by copying files from nograssnoshadows folder"""
+        if not os.path.exists(self.game_dir):
+            QMessageBox.critical(self, "Error", "Game directory not found!")
+            return
+            
+        try:
+            self.status_label.setText("Applying performance settings...")
+            
+            # Get the path to the nograssnoshadows folder
+            nograss_dir = os.path.join(os.path.dirname(sys.executable), "nograssnoshadows")
+            if not os.path.exists(nograss_dir):
+                nograss_dir = os.path.join(os.path.dirname(__file__), "nograssnoshadows")
+            
+            if not os.path.exists(nograss_dir):
+                QMessageBox.critical(self, "Error", 
+                    "Performance settings folder not found!\n"
+                    "Please make sure the 'nograssnoshadows' folder is in the same directory as the launcher.")
+                self.status_label.setText("Failed to apply performance settings")
+                return
+            
+            # Check if we have write permissions to the game directory
+            try:
+                test_file = os.path.join(self.game_dir, "test_write.tmp")
+                with open(test_file, 'w') as f:
+                    f.write("test")
+                os.remove(test_file)
+            except (PermissionError, OSError):
+                QMessageBox.critical(self, "Error", 
+                    "No permission to write to game directory.\n\n"
+                    "Please run the launcher as administrator and make sure:\n"
+                    "1. The game is not running\n"
+                    "2. No other programs are using the game files\n"
+                    "3. Your antivirus is not blocking access")
+                self.status_label.setText("Failed to apply performance settings - Permission denied")
+                return
+            
+            # Copy all files from nograssnoshadows to game directory using safe_file_operation
+            success = True
+            error_files = []
+            
+            for item in os.listdir(nograss_dir):
+                source = os.path.join(nograss_dir, item)
+                destination = os.path.join(self.game_dir, item)
+                
+                try:
+                    if not safe_file_operation(source, destination, 'copy'):
+                        success = False
+                        error_files.append(item)
+                except Exception as e:
+                    success = False
+                    error_files.append(f"{item} ({str(e)})")
+            
+            if success:
+                self.status_label.setText("Performance settings applied successfully!")
+                QMessageBox.information(self, "Success", 
+                    "Performance settings have been applied successfully!\n\n"
+                    "The following changes were made:\n"
+                    "• Disabled grass rendering\n"
+                    "• Disabled shadows\n"
+                    "• Optimized draw distance\n\n"
+                    "These changes should improve performance significantly.")
+            else:
+                error_message = "Failed to apply some performance settings:\n\n"
+                for file in error_files:
+                    error_message += f"• {file}\n"
+                error_message += "\nThis might be caused by your antivirus. Please:\n"
+                error_message += "1. Check your antivirus quarantine\n"
+                error_message += "2. Add the game folder to antivirus exclusions\n"
+                error_message += "3. Temporarily disable real-time protection"
+                
+                QMessageBox.warning(self, "Partial Success", error_message)
+                self.status_label.setText("Performance settings partially applied")
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Error", 
+                f"Failed to apply performance settings: {str(e)}\n\n"
+                "This might be caused by your antivirus. Please:\n"
+                "1. Check your antivirus quarantine\n"
+                "2. Add the game folder to antivirus exclusions\n"
+                "3. Temporarily disable real-time protection")
+            self.status_label.setText("Failed to apply performance settings")
 
 def main():
     app = QApplication(sys.argv)
