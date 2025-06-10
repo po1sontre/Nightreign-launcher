@@ -927,11 +927,6 @@ class GameSettingsDialog(QDialog):
         
         layout.addWidget(mod_group)
         
-        # Progress Bar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setVisible(False)
-        layout.addWidget(self.progress_bar)
-        
         # Close Button
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.accept)
@@ -981,34 +976,27 @@ class GameSettingsDialog(QDialog):
                 left: 10px;
                 padding: 0 3px 0 3px;
             }}
-            QProgressBar {{
-                border: 2px solid {parent.theme_color if parent else '#00b4b4'};
-                border-radius: 5px;
-                text-align: center;
-                background-color: #1a1a1a;
-            }}
-            QProgressBar::chunk {{
-                background-color: {parent.theme_color if parent else '#00b4b4'};
-            }}
         """)
     
     def apply_performance_settings(self):
-        """Apply performance settings"""
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setValue(0)
-        
+        """Copy the contents of the 'nograssnoshadows' folder into the game directory, replacing existing files."""
         try:
-            self.progress_bar.setValue(50)
-            self.parent().apply_performance_settings()
-            
-            self.progress_bar.setValue(100)
-            QMessageBox.information(self, "Success", "Performance settings applied successfully!")
-            
+            # Find the nograssnoshadows folder (next to exe or script)
+            src_dir = os.path.join(os.path.dirname(sys.executable), "nograssnoshadows")
+            if not os.path.exists(src_dir):
+                src_dir = os.path.join(os.path.dirname(__file__), "nograssnoshadows")
+            if not os.path.exists(src_dir):
+                raise Exception("'nograssnoshadows' folder not found next to the launcher.")
+            dest_dir = self.parent().game_dir
+            # Copy each file from src_dir to dest_dir, replacing
+            for item in os.listdir(src_dir):
+                src_path = os.path.join(src_dir, item)
+                dest_path = os.path.join(dest_dir, item)
+                if not safe_file_operation(src_path, dest_path, 'copy'):
+                    raise Exception(f"Failed to copy {item} to game folder. Please ensure the game is not running and you have administrator privileges.")
+            QMessageBox.information(self, "Success", "Performance settings applied successfully! (Grass and shadows disabled)")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to apply performance settings: {str(e)}")
-        
-        finally:
-            self.progress_bar.setVisible(False)
     
     def unlock_fps(self):
         """Run the FPS unlocker executable"""
@@ -1054,9 +1042,6 @@ class GameSettingsDialog(QDialog):
         """Apply the selected mod"""
         if self.mod_combo.currentText():
             try:
-                self.progress_bar.setVisible(True)
-                self.progress_bar.setValue(0)
-                
                 # Get paths
                 mods_dir = os.path.join(os.path.dirname(sys.executable), "mods")
                 if not os.path.exists(mods_dir):
@@ -1066,8 +1051,6 @@ class GameSettingsDialog(QDialog):
                 mod_regulation = os.path.join(mod_folder, "regulation.bin")
                 game_regulation = os.path.join(self.parent().game_dir, "regulation.bin")
                 
-                self.progress_bar.setValue(30)
-                
                 # Check if mod regulation.bin exists
                 if not os.path.exists(mod_regulation):
                     raise Exception(f"regulation.bin not found in {mod_folder}")
@@ -1076,27 +1059,18 @@ class GameSettingsDialog(QDialog):
                 if not safe_file_operation(mod_regulation, game_regulation, 'copy'):
                     raise Exception("Failed to apply mod. Please ensure the game is not running and you have administrator privileges.")
                 
-                self.progress_bar.setValue(100)
                 QMessageBox.information(self, "Success", 
                     f"Successfully applied {self.mod_combo.currentText()} mod!")
                 
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to apply mod: {str(e)}")
-            
-            finally:
-                self.progress_bar.setVisible(False)
     
     def reset_to_normal(self):
         """Reset to normal regulation.bin"""
         try:
-            self.progress_bar.setVisible(True)
-            self.progress_bar.setValue(0)
-            
             # Get paths
             game_regulation = os.path.join(self.parent().game_dir, "regulation.bin")
             original_backup = os.path.join(self.parent().game_dir, "regulation_backups", "regulation_original.bin")
-            
-            self.progress_bar.setValue(30)
             
             # Check if original backup exists
             if not os.path.exists(original_backup):
@@ -1106,15 +1080,11 @@ class GameSettingsDialog(QDialog):
             if not safe_file_operation(original_backup, game_regulation, 'copy'):
                 raise Exception("Failed to reset to normal regulation.bin. Please ensure the game is not running and you have administrator privileges.")
             
-            self.progress_bar.setValue(100)
             QMessageBox.information(self, "Success", 
                 "Successfully reset to normal regulation.bin!")
             
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to reset regulation.bin: {str(e)}")
-        
-        finally:
-            self.progress_bar.setVisible(False)
 
 class NightreignLauncher(QMainWindow):
     def __init__(self):
@@ -1255,7 +1225,7 @@ class NightreignLauncher(QMainWindow):
         self.update_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.update_button.clicked.connect(self.update_game)
         
-        self.patch_button = QPushButton("Patch Game")
+        self.patch_button = QPushButton("Patch Game (online fix)")
         self.patch_button.setMinimumSize(250, 55)
         self.patch_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.patch_button.clicked.connect(self.patch_game)
@@ -2207,22 +2177,18 @@ You can start using the launcher right away!
         dialog.exec()
 
     def apply_performance_settings(self):
-        """Apply performance settings"""
-        self.progress_bar.setVisible(True)
-        self.progress_bar.setValue(0)
-        
-        try:
-            self.progress_bar.setValue(50)
-            self.parent().apply_performance_settings()
-            
-            self.progress_bar.setValue(100)
-            QMessageBox.information(self, "Success", "Performance settings applied successfully!")
-            
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to apply performance settings: {str(e)}")
-        
-        finally:
-            self.progress_bar.setVisible(False)
+        """Copy the contents of the 'nograssnoshadows' folder into the game directory, replacing existing files."""
+        src_dir = os.path.join(os.path.dirname(sys.executable), "nograssnoshadows")
+        if not os.path.exists(src_dir):
+            src_dir = os.path.join(os.path.dirname(__file__), "nograssnoshadows")
+        if not os.path.exists(src_dir):
+            raise Exception("'nograssnoshadows' folder not found next to the launcher.")
+        dest_dir = self.game_dir
+        for item in os.listdir(src_dir):
+            src_path = os.path.join(src_dir, item)
+            dest_path = os.path.join(dest_dir, item)
+            if not safe_file_operation(src_path, dest_path, 'copy'):
+                raise Exception(f"Failed to copy {item} to game folder. Please ensure the game is not running and you have administrator privileges.")
 
 def main():
     app = QApplication(sys.argv)
