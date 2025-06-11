@@ -1125,7 +1125,17 @@ class NightreignLauncher(QMainWindow):
             self.steam_dir = r"C:\Program Files (x86)\Steam"
         self.steam_templates_dir = get_steam_templates_dir(self.steam_dir)
         self.steam_config_dir = get_steam_config_dir(self.steam_dir)
-        self.vdf_file = resource_path("game_actions_480.vdf")
+        
+        # Set VDF file path - works for both dev and packaged versions
+        if hasattr(sys, '_MEIPASS'):
+            # When running as exe, look in the same directory as the exe
+            self.vdf_file = os.path.join(os.path.dirname(sys.executable), "game_actions_480.vdf")
+        else:
+            # When running as script, look in the same directory as the script
+            self.vdf_file = os.path.join(os.path.dirname(__file__), "game_actions_480.vdf")
+        
+        # Initialize player count
+        self.player_count = 3  # Default to 3 players
         
         # Path for update.exe - works for both dev and packaged versions
         if hasattr(sys, '_MEIPASS'):
@@ -1328,23 +1338,25 @@ class NightreignLauncher(QMainWindow):
             self.controller_button.setEnabled(False)
             self.status_label.setText("Game directory not found. Please select your Nightreign game folder.")
             return False
-            
+        
         # Check if nrsc_launcher.exe exists
         if not os.path.exists(os.path.join(self.game_dir, "nrsc_launcher.exe")):
-            self.status_label.setText("Game needs to be patched. Patching automatically...")
-            self.patch_game()
-            # After patching, check again if the file exists
-            if not os.path.exists(os.path.join(self.game_dir, "nrsc_launcher.exe")):
-                self.select_folder_button.show()
-                self.start_button.setEnabled(False)
-                self.patch_button.setEnabled(True)
-                self.controller_button.setEnabled(False)
-                self.status_label.setText("Automatic patching failed. Please try patching manually.")
-                return False
+            self.status_label.setText(
+                "The game is missing required files (such as nrsc_launcher.exe).\n"
+                "This is normal for a new installation.\n"
+                "Please patch the game using the 'Patch Game' button."
+            )
+            self.patch_button.show()
+            self.patch_button.setEnabled(True)
+            self.start_button.setEnabled(False)
+            self.controller_button.setEnabled(False)
+            self.select_folder_button.show()
+            return False
         
         self.select_folder_button.hide()
         self.start_button.setEnabled(True)
         self.patch_button.setEnabled(True)
+        self.patch_button.show()
         self.controller_button.setEnabled(True)
         self.status_label.setText("Ready to launch")
         return True
@@ -1715,6 +1727,7 @@ class NightreignLauncher(QMainWindow):
             button.setChecked(False)
         
         self.player_buttons[count-1].setChecked(True)
+        self.player_count = count  # Update the player_count attribute
         
         if self.update_player_count(count):
             self.status_label.setText(f"Player count set to {count}")
@@ -1761,86 +1774,21 @@ class NightreignLauncher(QMainWindow):
             return False
 
     def start_game(self):
-        if not os.path.exists(self.game_path):
-            # Try to patch the game first
-            if not self.patch_game():
-                QMessageBox.critical(self, "Error", "Game executable not found and patching failed!")
-                return
-            # Check if patching was successful
-            if not os.path.exists(self.game_path):
-                QMessageBox.critical(self, "Error", "Game executable not found after patching!")
-                return
-
-        # Move regulation.bin if it hasn't been moved before
-        if not self.move_regulation_bin():
-            return
-
-        selected_count = next((i+1 for i, btn in enumerate(self.player_buttons) if btn.isChecked()), 3)
-        if not self.update_player_count(selected_count):
-            self.status_label.setText("Failed to update player count before launch")
-            return
-
-        self.status_label.setText(f"Launching game with {selected_count} player(s)...")
-        
+        """Start the game with admin privileges"""
         try:
-            # First try to run as admin using ShellExecuteW
-            result = ctypes.windll.shell32.ShellExecuteW(
-                None, 
-                "runas",
-                self.game_path,
-                None,
-                os.path.dirname(self.game_path),
-                1
-            )
+            # Update player count in config before launching
+            self.update_player_count(self.player_count)
             
-            # Check if ShellExecuteW failed
-            if result <= 32:  # ShellExecuteW returns values <= 32 on error
-                error_codes = {
-                    0: "Out of memory",
-                    2: "File not found",
-                    3: "Path not found",
-                    5: "Access denied",
-                    8: "Out of memory",
-                    26: "Sharing violation",
-                    27: "Association incomplete",
-                    28: "DDE timeout",
-                    29: "DDE fail",
-                    30: "DDE busy",
-                    31: "No association",
-                    32: "DLL not found"
-                }
-                error_msg = error_codes.get(result, f"Unknown error (code: {result})")
-                
-                # Try alternative method using subprocess
-                try:
-                    subprocess.run(
-                        [self.game_path],
-                        cwd=os.path.dirname(self.game_path),
-                        shell=True,
-                        check=True
-                    )
-                except subprocess.CalledProcessError as e:
-                    QMessageBox.critical(self, "Error", 
-                        f"Failed to launch game with admin privileges.\n\n"
-                        f"First attempt error: {error_msg}\n"
-                        f"Second attempt error: {str(e)}\n\n"
-                        "Please try the following:\n"
-                        "1. Right-click the launcher and select 'Run as administrator'\n"
-                        "2. Make sure your antivirus is not blocking the game\n"
-                        "3. Check if the game folder has proper permissions")
-                    self.status_label.setText("Failed to launch game")
-                    return
-                
-            self.status_label.setText("Game launched successfully!")
+            # Get the path to nrsc_launcher.exe
+            launcher_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
+            if not os.path.exists(launcher_path):
+                raise Exception("nrsc_launcher.exe not found in game directory")
+            
+            # Start the game with admin privileges
+            ctypes.windll.shell32.ShellExecuteW(None, "runas", launcher_path, None, self.game_dir, 1)
             
         except Exception as e:
-            QMessageBox.critical(self, "Error", 
-                f"Failed to launch game: {str(e)}\n\n"
-                "Please try the following:\n"
-                "1. Right-click the launcher and select 'Run as administrator'\n"
-                "2. Make sure your antivirus is not blocking the game\n"
-                "3. Check if the game folder has proper permissions")
-            self.status_label.setText("Failed to launch game")
+            QMessageBox.critical(self, "Error", f"Failed to start game: {str(e)}")
 
     def show_settings(self):
         dialog = SettingsDialog(self)
