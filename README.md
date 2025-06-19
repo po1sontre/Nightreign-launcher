@@ -28,7 +28,7 @@ This is a simple launcher and game manager for the Nightreign mod, built with Py
 5. Run the application (`python main.py`).
 6. To build the executable, run the PyInstaller command (ensure you have converted `icon.jpg` to `icon.ico` and placed it in the project root):
    ```bash
-   pyinstaller --onefile --windowed --icon=icon.ico --add-data "online_patch;online_patch" --add-data "templates;templates" --add-data "game_actions_480.vdf;." --hidden-import PySide6.QtWidgets --hidden-import PySide6.QtCore --hidden-import PySide6.QtGui --name="Nightreign Launcher" main.py
+   pyinstaller --noconfirm --onefile --windowed --icon=icon.ico main.py
    ```
 
 ## Contributing:
