@@ -127,14 +127,14 @@ def validate_game_directory(potential_dir):
         return None
 
     # Check if the expected game executable exists directly in the potential_dir
-    if os.path.exists(os.path.join(potential_dir, "nrsc_launcher.exe")):
+    if os.path.exists(os.path.join(potential_dir, "nightreign.exe")):
         return potential_dir
 
     # If not found directly, check common subdirectories like 'Game'
     common_subdirs = ["Game"]
     for subdir_name in common_subdirs:
         subdir_path = os.path.join(potential_dir, subdir_name)
-        if os.path.exists(os.path.join(subdir_path, "nrsc_launcher.exe")):
+        if os.path.exists(os.path.join(subdir_path, "nightreign.exe")):
             return subdir_path
 
     # If still not found, return None
@@ -1333,18 +1333,26 @@ class NightreignLauncher(QMainWindow):
             self.status_label.setText("Game directory not found. Please select your Nightreign game folder.")
             return False
         
-        # Check if nrsc_launcher.exe exists
+        # Check if nightreign.exe exists (the base game executable)
+        if not os.path.exists(os.path.join(self.game_dir, "nightreign.exe")):
+            self.select_folder_button.show()
+            self.start_button.setEnabled(False)
+            self.patch_button.setEnabled(False)
+            self.controller_button.setEnabled(False)
+            self.status_label.setText("Game directory not found. Please select your Nightreign game folder.")
+            return False
+        
+        # Check if nrsc_launcher.exe exists (the patched launcher)
         if not os.path.exists(os.path.join(self.game_dir, "nrsc_launcher.exe")):
             self.status_label.setText(
-                "The game is missing required files (such as nrsc_launcher.exe).\n"
-                "This is normal for a new installation.\n"
-                "Please patch the game using the 'Patch Game' button."
+                "Game folder found! However, the game needs to be patched.\n"
+                "Please click 'Patch Game' to install required files, then restart the launcher."
             )
             self.patch_button.show()
             self.patch_button.setEnabled(True)
             self.start_button.setEnabled(False)
             self.controller_button.setEnabled(False)
-            self.select_folder_button.show()
+            self.select_folder_button.hide()  # Hide since we found the correct folder
             return False
         
         self.select_folder_button.hide()
@@ -1933,8 +1941,8 @@ class NightreignLauncher(QMainWindow):
         """Show the welcome dialog on first launch"""
         dialog = WelcomeDialog(self)
         
-        # Check if the game directory is valid (contains nrsc_launcher.exe)
-        is_valid_game_dir = os.path.exists(os.path.join(self.game_dir, "nrsc_launcher.exe"))
+        # Check if the game directory is valid (contains nightreign.exe)
+        is_valid_game_dir = os.path.exists(os.path.join(self.game_dir, "nightreign.exe"))
         
         if not is_valid_game_dir:
             dialog.message.setText("""
@@ -1955,7 +1963,11 @@ Would you like to select your game folder now?
             dialog.select_folder_btn.setText("Select Game Folder")
             dialog.skip_btn.setText("Skip for Now")
         else:
-            dialog.message.setText("""
+            # Check if the game is already patched
+            is_patched = os.path.exists(os.path.join(self.game_dir, "nrsc_launcher.exe"))
+            
+            if is_patched:
+                dialog.message.setText("""
 This launcher will help you manage your Nightreign game installation. Here's what you can do:
 
 • Start the game with admin privileges
@@ -1965,17 +1977,34 @@ This launcher will help you manage your Nightreign game installation. Here's wha
 • Backup your save files
 • Customize the launcher's appearance
 
-Your game folder is already set up correctly!
-
-Important Instructions:
-1. Click "Patch Game" to install the necessary game files
-2. For updates, make sure to select the main Nightreign folder (C:\\Games\\ELDEN RING NIGHTREIGN) and NOT the Game folder
+Your game folder is already set up correctly and patched!
 
 You can start using the launcher right away!
 
-            """)
-            dialog.select_folder_btn.setText("Finish")
-            dialog.skip_btn.hide()  # Hide the skip button since we only need Finish
+                """)
+                dialog.select_folder_btn.setText("Finish")
+                dialog.skip_btn.hide()  # Hide the skip button since we only need Finish
+            else:
+                dialog.message.setText("""
+This launcher will help you manage your Nightreign game installation. Here's what you can do:
+
+• Start the game with admin privileges
+• Update to the latest version
+• Patch game files if needed
+• Apply controller fixes
+• Backup your save files
+• Customize the launcher's appearance
+
+Your game folder is set up correctly!
+
+Next Steps:
+1. Click "Patch Game" to install the necessary game files
+2. Restart the launcher after patching
+3. You'll be ready to play!
+
+                """)
+                dialog.select_folder_btn.setText("Finish")
+                dialog.skip_btn.hide()  # Hide the skip button since we only need Finish
         
         if dialog.exec() == QDialog.Accepted:
             if not is_valid_game_dir:
