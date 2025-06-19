@@ -17,6 +17,8 @@ from PySide6.QtGui import QFont, QPalette, QColor, QIcon
 import time
 from pathlib import Path
 
+SW_NORMAL = 1
+
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     if hasattr(sys, '_MEIPASS'):
@@ -999,44 +1001,53 @@ class GameSettingsDialog(QDialog):
             QMessageBox.critical(self, "Error", f"Failed to apply performance settings: {str(e)}")
     
     def unlock_fps(self):
-        """Run the FPS unlocker executable"""
+        """Copy all files from the 'fps unlock' folder into the game directory"""
         try:
-            # Get the path to the FPS unlocker executable
+            # Get the path to the FPS unlock folder
             fps_unlocker_dir = os.path.join(os.path.dirname(sys.executable), "fps unlock")
             if not os.path.exists(fps_unlocker_dir):
                 fps_unlocker_dir = os.path.join(os.path.dirname(__file__), "fps unlock")
             
-            fps_unlocker_exe = os.path.join(fps_unlocker_dir, "NightReignFPSUnlocker.exe")
+            if not os.path.exists(fps_unlocker_dir):
+                raise Exception("'fps unlock' folder not found next to the launcher")
             
-            if not os.path.exists(fps_unlocker_exe):
-                raise Exception("FPS unlocker executable not found")
+            dest_dir = self.parent().game_dir
             
-            # Run the FPS unlocker
-            result = subprocess.run([fps_unlocker_exe], 
-                                 capture_output=True, 
-                                 text=True,
-                                 check=False)  # Don't raise exception on non-zero exit
-            
-            if result.returncode == 0:
-                QMessageBox.information(self, "Success", 
-                    "FPS unlocker has been launched successfully!\n\n"
-                    "Please follow the instructions in the FPS unlocker window.")
-            else:
-                error_message = "FPS unlocker failed to start"
-                if result.stdout:
-                    error_message += f"\n\nDetails:\n{result.stdout}"
-                if result.stderr:
-                    error_message += f"\n\nError:\n{result.stderr}"
+            # Copy each file from fps_unlocker_dir to dest_dir, replacing existing files
+            success = True
+            for item in os.listdir(fps_unlocker_dir):
+                src_path = os.path.join(fps_unlocker_dir, item)
+                dest_path = os.path.join(dest_dir, item)
                 
-                QMessageBox.warning(self, "Error", error_message)
+                if not safe_file_operation(src_path, dest_path, 'copy'):
+                    success = False
+                    QMessageBox.critical(self, "Error", 
+                        f"Failed to copy {item} to game folder.\n\n"
+                        "This might be caused by permissions or antivirus. Please ensure:\n"
+                        "1. The game is not running\n"
+                        "2. Your antivirus is not blocking access\n"
+                        "3. You have run the launcher as administrator")
+                    break # Stop copying on first failure
+            
+            if success:
+                QMessageBox.information(self, "Success", 
+                    "FPS unlock files have been copied successfully!\n\n"
+                    "The FPS cap has been removed from your game.")
+            else:
+                QMessageBox.critical(self, "Error", 
+                    "Failed to copy some FPS unlock files.\n\n"
+                    "Please ensure:\n"
+                    "1. The game is not running\n"
+                    "2. Your antivirus is not blocking access\n"
+                    "3. You have run the launcher as administrator")
             
         except Exception as e:
             QMessageBox.critical(self, "Error", 
-                f"Failed to run FPS unlocker: {str(e)}\n\n"
+                f"Failed to copy FPS unlock files: {str(e)}\n\n"
                 "Please ensure:\n"
-                "1. The FPS unlocker executable exists in the 'fps unlock' folder\n"
+                "1. The 'fps unlock' folder exists next to the launcher\n"
                 "2. You have run the launcher as administrator\n"
-                "3. Your antivirus is not blocking the FPS unlocker")
+                "3. Your antivirus is not blocking the files")
     
     def apply_mod(self):
         """Apply the selected mod"""
@@ -1135,7 +1146,8 @@ class NightreignLauncher(QMainWindow):
             self.vdf_file = os.path.join(os.path.dirname(__file__), "game_actions_480.vdf")
         
         # Initialize player count
-        self.player_count = 3  # Default to 3 players
+        # (Removed player count logic)
+        # self.player_count = 3  # Default to 3 players
         
         # Path for update.exe - works for both dev and packaged versions
         if hasattr(sys, '_MEIPASS'):
@@ -1266,23 +1278,6 @@ class NightreignLauncher(QMainWindow):
         self.select_folder_button.setFont(QFont("Arial", 13, QFont.Bold))
         self.select_folder_button.clicked.connect(self.select_game_folder)
         
-        # Player Count Selection
-        player_container = QWidget()
-        player_layout = QHBoxLayout(player_container)
-        player_layout.setSpacing(10)
-        
-        self.player_buttons = []
-        for count in [1, 2, 3]:
-            button = QPushButton(f"{count} Player{'s' if count > 1 else ''}")
-            button.setMinimumSize(120, 40)
-            button.setFont(QFont("Arial", 11, QFont.Bold))
-            button.setCheckable(True)
-            button.clicked.connect(lambda checked, c=count: self.set_player_count(c))
-            self.player_buttons.append(button)
-            player_layout.addWidget(button)
-        
-        self.player_buttons[2].setChecked(True)
-        
         # Status Bar
         status_frame = QFrame()
         status_frame.setFrameStyle(QFrame.StyledPanel)
@@ -1308,7 +1303,6 @@ class NightreignLauncher(QMainWindow):
         layout.addWidget(self.backup_button)
         layout.addWidget(self.game_settings_button)  # New Game Settings button
         layout.addWidget(self.select_folder_button)
-        layout.addWidget(player_container)
         layout.addStretch()
         layout.addWidget(status_frame)
         layout.addWidget(self.credits_label)
@@ -1501,25 +1495,6 @@ class NightreignLauncher(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to create backup: {str(e)}")
             self.status_label.setText("Failed to create backup")
-
-    def update_player_count(self, count):
-        try:
-            with open(self.settings_path, 'r') as file:
-                lines = file.readlines()
-            
-            for i, line in enumerate(lines):
-                if line.strip().startswith('player_count ='):
-                    indent = line[:line.find('player_count')]
-                    lines[i] = f"{indent}player_count = {count}\n"
-                    break
-            
-            with open(self.settings_path, 'w') as file:
-                file.writelines(lines)
-            
-            return True
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to update settings: {str(e)}")
-            return False
 
     def patch_game(self):
         if not os.path.exists(self.patch_dir):
@@ -1722,18 +1697,6 @@ class NightreignLauncher(QMainWindow):
                 "5. Your antivirus is not blocking access")
             self.status_label.setText("Failed to apply controller fix")
 
-    def set_player_count(self, count):
-        for button in self.player_buttons:
-            button.setChecked(False)
-        
-        self.player_buttons[count-1].setChecked(True)
-        self.player_count = count  # Update the player_count attribute
-        
-        if self.update_player_count(count):
-            self.status_label.setText(f"Player count set to {count}")
-        else:
-            self.status_label.setText("Failed to update player count")
-
     def get_theme_color(self, color_name):
         """Get the hex color code for a theme color name"""
         color_map = {
@@ -1774,19 +1737,20 @@ class NightreignLauncher(QMainWindow):
             return False
 
     def start_game(self):
-        """Start the game with admin privileges"""
+        """Start the game with admin privileges using ShellExecuteW directly"""
         try:
-            # Update player count in config before launching
-            self.update_player_count(self.player_count)
-            
             # Get the path to nrsc_launcher.exe
             launcher_path = os.path.join(self.game_dir, "nrsc_launcher.exe")
             if not os.path.exists(launcher_path):
                 raise Exception("nrsc_launcher.exe not found in game directory")
-            
-            # Start the game with admin privileges
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", launcher_path, None, self.game_dir, 1)
-            
+
+            # Use ShellExecuteW to run as admin
+            result = ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", launcher_path, None, self.game_dir, 1
+            )
+            if result <= 32:
+                raise Exception(f"ShellExecuteW failed with error code: {result}")
+
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to start game: {str(e)}")
 
